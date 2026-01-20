@@ -18,11 +18,20 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 ## Operations
 
-_List the operations supported by your node._
+1. PDF Operations
+Lets you perform following operations on the PDF
+- PDF/A compliance
+- PDF/UA standard
+- Password protect PDF
+- Remove last page
+- Single Page PDF
+- Watermark
+
+2. Processing/Conversion of the Office files/HTML/PDF based on the template provided.
 
 ## Credentials
 
-_If users need to authenticate with the app/service, provide details here. You should include prerequisites (such as signing up with the service), available authentication methods, and how to set them up._
+Signup and get the API key from [APEXOfficePrint](https://www.united-codes.com/products/apexofficeprint/).
 
 ## Compatibility
 
