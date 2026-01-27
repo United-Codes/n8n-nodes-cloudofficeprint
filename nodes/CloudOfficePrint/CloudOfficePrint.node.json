@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-base.APEXOfficePrint",
+	"node": "n8n-nodes-base.CloudOfficePrint",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": [

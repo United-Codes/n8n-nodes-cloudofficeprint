@@ -1,6 +1,6 @@
-# n8n-nodes-apexofficeprint
+# n8n-nodes-cloudofficeprint
 
-This is an n8n community node. It lets you use **APEX Office Print** in your n8n workflows.
+This is an n8n community node. It lets you use **Cloud Office Print** in your n8n workflows.
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
@@ -31,7 +31,7 @@ Lets you perform following operations on the PDF
 
 ## Credentials
 
-Signup and get the API key from [APEXOfficePrint](https://www.united-codes.com/products/apexofficeprint/).
+Signup and get the API key from [CloudOfficePrint](https://www.united-codes.com/products/cloudofficeprint/).
 
 ## Compatibility
 

@@ -33,22 +33,11 @@ export const properties: INodeProperties[] = [
         required: true,
     },
     outputTypeDesc,
-    // {
-    //     displayName: 'Output Type',
-    //     name: 'outputType',
-    //     type: 'options',
-    //     default: 'pdf',
-    //     required: true,
-    //     options: [
-    //         { name: 'PDF', value: 'pdf' },
-    //         { name: 'HTML', value: 'html' },
-    //     ],
-    // }
 ];
 
 const displayOptions = {
     show: {
-        resource: ['standardAOPCall'],
+        resource: ['documentGeneration'],
         operation: ['general'],
     },
 };

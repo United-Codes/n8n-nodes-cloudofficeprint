@@ -23,7 +23,7 @@ export const fileDesc: INodeProperties = {
                     options: [
                         { name: 'URL', value: 'url' },
                         { name: 'Base64', value: 'base64' },
-                        { name: 'File Path', value: 'file' },
+                        // { name: 'File Path', value: 'file' },
                     ],
                 },
 
@@ -38,7 +38,11 @@ export const fileDesc: INodeProperties = {
                     },
                     displayOptions: {
                         show: {
-                            fileSource: ['url', 'base64', 'file'],
+                            fileSource: [
+                                'url',
+                                'base64',
+                                // 'file'
+                            ],
                         },
                     },
                     description:
@@ -49,7 +53,8 @@ export const fileDesc: INodeProperties = {
                     displayName: 'Filename',
                     name: 'filename',
                     type: 'string',
-                    default: 'file.pdf',
+                    placeholder: 'file.docx',
+                    default: '',
                     required: true,
                     description: 'Name of the file including extension',
                 },

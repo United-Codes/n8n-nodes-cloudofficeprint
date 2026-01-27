@@ -2,34 +2,34 @@
 import { NodeConnectionTypes, type INodeTypeDescription } from 'n8n-workflow';
 
 import * as pdfOperations from './pdfOperations';
-import * as standardAOPCall from './standardAOPCall';
+import * as standardCOPCall from './standardCOPCall';
+import * as protectDocument from './protectDocument';
+import * as pdfCompare from './pdfCompare'
 
 export const description: INodeTypeDescription = {
-	displayName: 'APEX Office Print',
-	name: 'apexOfficePrint',
+	displayName: 'Cloud Office Print',
+	name: 'cloudOfficePrint',
 	group: ['transform'],
 	icon: {
-		light: 'file:aop.svg',
-		dark: 'file:aop.dark.svg'
+		light: 'file:cop.svg',
+		dark: 'file:cop.dark.svg'
 	},
 	subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-	description: 'Generate/convert/edit/manage documents with AOP',
+	description: 'Generate/convert/edit/manage documents with Cloud Office Print',
 	version: 1,
 	defaultVersion: 1,
 	defaults: {
-		name: 'APEX Office Print',
+		name: 'Cloud Office Print',
 	},
 	inputs: [NodeConnectionTypes.Main],
 	outputs: [NodeConnectionTypes.Main],
 	usableAsTool: true,
 	credentials: [
 		{
-			name: 'aopApi',
+			name: 'copApi',
 			required: true,
 		},
 	],
-	// waitingNodeTooltip: SEND_AND_WAIT_WAITING_TOOLTIP,
-	// webhooks: sendAndWaitWebhooksDescription,    
 	properties: [
 		{
 			displayName: 'Resource',
@@ -38,17 +38,27 @@ export const description: INodeTypeDescription = {
 			noDataExpression: true,
 			default: 'pdfOperations',
 			options: [
+                {
+                    name: 'Document Generation',
+                    value: 'documentGeneration',
+                },
 				{
 					name: 'PDF Operation',
 					value: 'pdfOperations',
 				},
 				{
-					name: 'Standard AOP Call',
-					value: 'standardAOPCall',
-				}
+					name: 'Password Protect Document',
+					value: 'protectDocument',
+				},
+                {
+					name: 'PDF Compare',
+					value: 'pdfCompare',
+				},
 			],
 		},
+        ...standardCOPCall.description,
 		...pdfOperations.description,
-        ...standardAOPCall.description,
+		...protectDocument.description,
+		...pdfCompare.description,
 	],
 };

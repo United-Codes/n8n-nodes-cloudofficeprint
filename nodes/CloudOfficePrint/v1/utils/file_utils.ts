@@ -10,7 +10,7 @@ type File = {
     mime_type: string;
 }
 
-type Template = {
+export type Template = {
     filename: string;
     template_type: string;
     file: string;
@@ -83,73 +83,6 @@ export const appendPrependFileSupportedType = ["pdf", "docx", "docm", "xlsx", "p
 export const templateSupportedType = ["docx", "docm", "xlsx", "xlsm", "pptx", "pptm", "html", "md", "txt", "csv", "pdf", "ics", "ifb", "xml"];
 export const subtemplatesSupportedType = ["docx", "pptx"];
 
-// const fileDesc: INodeProperties = {
-//     displayName: 'File',
-//     name: 'file',
-//     type: 'fixedCollection',
-//     typeOptions: {
-//         multipleValues: true,
-//     },
-//     required: true,
-//     default: {},
-//     description: 'File to process',
-//     options: [
-//         {
-//             name: 'fileConfig',
-//             displayName: 'File Configuration',
-//             values: [
-//                 {
-//                     displayName: 'File Source',
-//                     name: 'fileSource',
-//                     type: 'options',
-//                     default: 'url',
-//                     options: [
-//                         { name: 'URL', value: 'url' },
-//                         { name: 'Base64', value: 'base64' },
-//                         { name: 'File Path', value: 'file' },
-//                     ],
-//                 },
-
-//                 {
-//                     displayName: 'File Data',
-//                     name: 'fileData',
-//                     type: 'string',
-//                     default: '',
-//                     required: true,
-//                     typeOptions: {
-//                         rows: 4,
-//                     },
-//                     displayOptions: {
-//                         show: {
-//                             fileSource: ['url', 'base64', 'file'],
-//                         },
-//                     },
-//                     description:
-//                         'URL, Base64 content, or file path depending on File Source',
-//                 },
-
-//                 {
-//                     displayName: 'Filename',
-//                     name: 'filename',
-//                     type: 'string',
-//                     default: 'file.pdf',
-//                     required: true,
-//                     description: 'Name of the file including extension',
-//                 },
-
-//                 {
-//                     displayName: 'Mime Type',
-//                     name: 'mimeType',
-//                     type: 'options',
-//                     default: "",
-//                     options: [],
-//                     required: true,
-//                 },
-//             ],
-//         },
-//     ],
-// };
-
 /**
  * 
  * @param name - The name of the file
@@ -159,8 +92,11 @@ export const subtemplatesSupportedType = ["docx", "pptx"];
  * @param required - Whether the file is required
  * @returns The file description
  */
-export function getFileDesc(name: "file" | "template" | "subtemplate", displayName: string, description: string, enableMultipleValues: boolean = true, required: boolean = true) {
+export function getFileDesc(name: "file" | "template" | "subtemplate" | "compare_file1" | "compare_file2", displayName: string, description: string, enableMultipleValues: boolean = true, required: boolean = true) {
     const mimeOptions = [];
+    const typeOptions : { multipleValues: boolean, minValue?: number, maxValue?: number } = {
+        multipleValues: enableMultipleValues,
+    }
     if (displayName.toLowerCase() === "template") {
         const tmpSupportedTypes = templateSupportedType.map(mimeType => mimeType.trim());
         LoggerProxy.info(JSON.stringify(tmpSupportedTypes));
@@ -170,8 +106,12 @@ export function getFileDesc(name: "file" | "template" | "subtemplate", displayNa
         // replace the options in fileDesc with the mimeOptions
         // @ts-expect-error - fileDesc.options is not optional
         fileDesc.options?.[0]?.values?.[3]?.options = mimeOptions as INodePropertyCollection[];
+        typeOptions.minValue = 1;
+        typeOptions.maxValue = 1;
+    }else if(name.toLowerCase().includes("compare_file")){
+        typeOptions.minValue = 1;
+        typeOptions.maxValue = 1;
     }
-
 
     return {
         ...fileDesc,
@@ -179,9 +119,7 @@ export function getFileDesc(name: "file" | "template" | "subtemplate", displayNa
         displayName: displayName,
         placeholder: "Add " + displayName,
         description: description,
-        typeOptions: {
-            multipleValues: enableMultipleValues,
-        },
+        typeOptions: typeOptions,
         required: required,
     }
 }
@@ -193,21 +131,23 @@ export function getFileDesc(name: "file" | "template" | "subtemplate", displayNa
  * @param name - The name of the file
  * @returns The files data
  */
-export function getFilesData(fileNodeParameters: FileNodeParameters[] | FileNodeParameters): File[] | Template {
-    const files = fileNodeParameters;
-
+export function getFilesData(fileNodeParameters: FileNodeParameters[] | FileNodeParameters, ref: "compare" | "template" = "template"): File[] | Template {
+    let files = fileNodeParameters;
+    if(ref === "compare"){
+        files = [fileNodeParameters as FileNodeParameters];
+    }
     // if it's not an array, then it's for a template
-    if (!Array.isArray(fileNodeParameters)) {
-        const mimeExtension = fileNodeParameters.mimeType;
+    if (!Array.isArray(files)) {
+        const mimeExtension = files.mimeType;
         // return the mime extension from supportedMimeType
         const template_type = Object.keys(supportedMimeType).find(key => supportedMimeType[key as keyof typeof supportedMimeType] === mimeExtension);
         if (!template_type) {
             throw new Error('Invalid mime type');
         }
         return {
-            filename: fileNodeParameters.filename as string,
+            filename: files.filename as string,
             template_type: template_type as string,
-            file: fileNodeParameters.fileData as string,
+            file: files.fileData as string,
         } as Template;
     }
     else if (Array.isArray(files)) { // cases for the prepend and append files

@@ -3,7 +3,9 @@ import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 import type { APEXOfficePrint } from './node.type';
 
 import * as pdfOperations from './pdfOperations';
-import * as standardAOPCall from './standardAOPCall';
+import * as standardCOPCall from './standardCOPCall';
+import * as protectDocument from './protectDocument';
+import * as pdfCompare from './pdfCompare';
 
 export async function router(this: IExecuteFunctions) {
     const items = this.getInputData();
@@ -25,8 +27,14 @@ export async function router(this: IExecuteFunctions) {
                 case 'pdfOperations':
                     responseData = await pdfOperations[apexOfficePrint.operation].execute.call(this, i);
                     break;
-                case 'standardAOPCall':
-                    responseData = await standardAOPCall[apexOfficePrint.operation].execute.call(this, i);
+                case 'documentGeneration':
+                    responseData = await standardCOPCall[apexOfficePrint.operation].execute.call(this, i);
+                    break;
+                case 'protectDocument':
+                    responseData = await protectDocument[apexOfficePrint.operation].execute.call(this, i);
+                    break;
+                case 'pdfCompare':
+                    responseData = await pdfCompare[apexOfficePrint.operation].execute.call(this, i);
                     break;
                 default:
                     throw new NodeOperationError(this.getNode(), `The resource "${resource}" is not known`);

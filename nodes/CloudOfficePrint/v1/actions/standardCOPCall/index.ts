@@ -12,15 +12,15 @@ export const description: INodeProperties[] = [
         noDataExpression: true,
         displayOptions: {
             show: {
-                resource: ['standardAOPCall'],
+                resource: ['documentGeneration'],
             },
         },
         options: [
             {
-                name: 'General',
+                name: 'Document Generation',
                 value: 'general',
-                description: 'General AOP call',
-                action: 'General AOP call',
+                description: 'Document generation with template',
+                action: 'Document generation with template',
             },
 
         ],

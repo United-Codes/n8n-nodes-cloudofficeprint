@@ -29,7 +29,7 @@ async function resolveTemplateFile(this: IExecuteFunctions, i: number, template:
 type WithValues = { values?: AnyObj };
 type FileWithValues = { values?: AnyObj };
 
-export async function buildAopPayload(this: IExecuteFunctions, i: number, apiKey: string) {
+export async function buildCopPayload(this: IExecuteFunctions, i: number, apiKey: string) {
     const templateFC = this.getNodeParameter('template', i) as WithValues;
     const outputFC = this.getNodeParameter('output', i) as WithValues;
     const filesFC = (this.getNodeParameter('files', i) as FileWithValues[]) ?? [];

@@ -14,10 +14,10 @@ import { getFileDesc, getFilesData } from '../../utils/file_utils';
 
 export const properties: INodeProperties[] = [
     getFileDesc(
-        'file',
+        'template',
         'File',
         'File to process (supports multiple files)',
-        true,
+        false,
         true
     ),
 ];
@@ -31,7 +31,7 @@ const displayOptions = {
 
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
-    const files = this.getNodeParameter(`file.fileConfig`, index) as { fileSource: string; fileData: string; filename: string; mimeType: string; }[];
+    const files = this.getNodeParameter(`template.fileConfig`, index) as { fileSource: string; fileData: string; filename: string; mimeType: string; }[];
     if (!files || files.length === 0) {
         throw new NodeOperationError(this.getNode(), 'No file configuration found. Please add a file to the input.');
     }

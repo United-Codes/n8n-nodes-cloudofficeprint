@@ -5,6 +5,7 @@ import type {
 } from 'n8n-workflow';
 
 import { getFileDesc, getFilesData } from '../../utils/file_utils';
+import type { Template } from '../../utils/file_utils';
 
 import {
     updateDisplayOptions,
@@ -19,41 +20,46 @@ export const properties: INodeProperties[] = [
     getFileDesc(
         'file',
         'File',
-        'File to process (supports multiple files)',
-        true,
-        true)
+        'File to process',
+        false,
+        true),
+    {
+        displayName: 'Password',
+        name: 'read_password',
+        description: 'Password to read the Office Document',
+        // eslint-disable-next-line n8n-nodes-base/node-param-type-options-password-missing
+        type: 'string',
+        default: '',
+    }
 ];
 
 const displayOptions = {
     show: {
-        resource: ['pdfOperations'],
-        operation: ['pdfACompliance'],
+        resource: ['protectDocument'],
+        operation: ['protectOfficeDocument'],
     },
 };
 
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
+    const readPassword = this.getNodeParameter('read_password', index) as string;
     const files = this.getNodeParameter('file.fileConfig', index) as { fileSource: string; fileData: string; filename: string; mimeType: string; }[];
     if (!files || files.length === 0) {
         throw new NodeOperationError(this.getNode(), 'No file configuration found. Please add a file to the input.');
     }
-    const filesData = getFilesData(files);
+    const template = getFilesData(files);
 
 
     const body: IDataObject = {
-        prepend_files: filesData,
-        template: {
-            template_type: "converter"
-        },
+        template: template,
         files: [{
             filename: 'output.pdf',
             data: [],
         }],
         output: {
-            output_converter: "openoffice",
-            output_convert_to_pdfa: "1b",
-            output_type: 'pdf',
+            output_type: (template as Template).template_type,
             output_encoding: 'base64',
+            output_read_password: readPassword,
         }
     };
     // const responseData = body

@@ -1,19 +1,19 @@
 {
-	"name": "n8n-nodes-apexofficeprint",
+	"name": "n8n-nodes-cloudofficeprint",
 	"version": "0.1.0",
-	"description": "APEXOfficePrint nodes for n8n",
+	"description": "CloudOfficePrint nodes for n8n",
 	"license": "MIT",
 	"homepage": "",
 	"keywords": [
 		"n8n-community-node-package"
 	],
 	"author": {
-		"name": "APEXOfficePrint",
-		"email": "support@apexofficeprint.com"
+		"name": "CloudOfficePrint",
+		"email": "support@cloudofficeprint.com"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/APEXOfficePrint/n8n-nodes-apexofficeprint.git"
+		"url": "https://github.com/united-codes/n8n-nodes-cloudofficeprint.git"
 	},
 	"scripts": {
 		"build": "n8n-node build",
@@ -31,10 +31,10 @@
 		"n8nNodesApiVersion": 1,
 		"strict": true,
 		"credentials": [
-			"dist/credentials/APEXOfficePrintApi.credentials.js"
+			"dist/credentials/CloudOfficePrintApi.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/APEXOfficePrint/APEXOfficePrint.node.js"
+			"dist/nodes/CloudOfficePrint/CloudOfficePrint.node.js"
 		]
 	},
 	"devDependencies": {
@@ -48,5 +48,8 @@
 	"peerDependencies": {
 		"n8n-workflow": "*"
 	},
-	"packageManager": "pnpm@10.28.0+sha512.05df71d1421f21399e053fde567cea34d446fa02c76571441bfc1c7956e98e363088982d940465fd34480d4d90a0668bc12362f8aa88000a64e83d0b0e47be48"
+	"packageManager": "pnpm@10.28.0+sha512.05df71d1421f21399e053fde567cea34d446fa02c76571441bfc1c7956e98e363088982d940465fd34480d4d90a0668bc12362f8aa88000a64e83d0b0e47be48",
+	"dependencies": {
+		"n8n-nodes-cloudofficeprint": "link:C:/Users/rabin/AppData/Local/pnpm/global/5/node_modules/n8n-nodes-cloudofficeprint"
+	}
 }

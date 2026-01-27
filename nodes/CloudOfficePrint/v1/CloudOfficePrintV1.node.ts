@@ -11,7 +11,7 @@ import { router } from './actions/router';
 import { outputType } from './methods';
 // import { sendAndWaitWebhook } from '../../../../utils/sendAndWait/utils';
 
-export class APEXOfficePrintV1 implements INodeType {
+export class CloudOfficePrintV1 implements INodeType {
     description: INodeTypeDescription;
 
     constructor(baseDescription: INodeTypeBaseDescription) {

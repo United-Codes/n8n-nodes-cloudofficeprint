@@ -4,10 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  n8n-nodes-cloudofficeprint: link:C:/Users/rabin/AppData/Local/pnpm/global/5/node_modules/n8n-nodes-cloudofficeprint
+
 importers:
 
   .:
     dependencies:
+      n8n-nodes-cloudofficeprint:
+        specifier: link:C:/Users/rabin/AppData/Local/pnpm/global/5/node_modules/n8n-nodes-cloudofficeprint
+        version: link:C:/Users/rabin/AppData/Local/pnpm/global/5/node_modules/n8n-nodes-cloudofficeprint
       n8n-workflow:
         specifier: '*'
         version: 1.120.6
