@@ -9,7 +9,7 @@ import {
     JsonObject
 } from 'n8n-workflow';
 
-import { NodeApiError, LoggerProxy as Logger } from 'n8n-workflow';
+import { NodeApiError } from 'n8n-workflow';
 
 /**
  * 
