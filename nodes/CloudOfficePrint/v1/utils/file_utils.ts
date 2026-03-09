@@ -101,11 +101,11 @@ export function getFileDesc(name: "file" | "template" | "subtemplate" | "compare
         const tmpSupportedTypes = templateSupportedType.map(mimeType => mimeType.trim());
         LoggerProxy.info(JSON.stringify(tmpSupportedTypes));
         for (const mimeType of tmpSupportedTypes) {
-            mimeOptions.push({ name: mimeType, value: supportedMimeType[mimeType as keyof typeof supportedMimeType] });
+            mimeOptions.push({ name: mimeType, value: mimeType });
         }
         // replace the options in fileDesc with the mimeOptions
         // @ts-expect-error - fileDesc.options is not optional
-        fileDesc.options?.[0]?.values?.[3]?.options = mimeOptions as INodePropertyCollection[];
+        fileDesc.options?.[0]?.values?.[1]?.options = mimeOptions as INodePropertyCollection[];
         typeOptions.minValue = 1;
         typeOptions.maxValue = 1;
     }else if(name.toLowerCase().includes("compare_file")){

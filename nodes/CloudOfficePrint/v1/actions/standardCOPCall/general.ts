@@ -46,7 +46,7 @@ export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
     let template;
     try {
-        const files = this.getNodeParameter( 'template.fileConfig', index) as { fileSource: string; fileData: string; filename: string; mimeType: string; }[];
+        const files = this.getNodeParameter('template.fileConfig', index) as { fileSource: string; fileData: string; filename: string; mimeType: string; }[];
         template = getFilesData(files);
     } catch (error) {
         // No template is added

@@ -2,8 +2,11 @@ import type { INodeProperties } from 'n8n-workflow';
 import * as singlePagePDF from './singlePagePDF';
 import * as watermarkPDF from './watermarkPDF';
 import * as pdfMetadata from './pdfMetadata';
+import * as convertFileToPDF from './convertFileToPDF';
+import * as mergeToPDF from './mergeToPDF';
+import * as compressPDF from './compressPDF';
 
-export { singlePagePDF, watermarkPDF, pdfMetadata };
+export { singlePagePDF, watermarkPDF, pdfMetadata, convertFileToPDF, mergeToPDF, compressPDF };
 
 export const description: INodeProperties[] = [
     {
@@ -17,6 +20,24 @@ export const description: INodeProperties[] = [
             },
         },
         options: [
+            {
+                name: 'Compress PDF',
+                value: 'compressPDF',
+                description: 'Compress a PDF file',
+                action: "Compress PDF"
+            },
+            {
+                name: 'Convert to PDF',
+                value: 'convertFileToPDF',
+                description: 'Convert files to PDF',
+                action: "Convert to PDF"
+            },
+            {
+                name: 'Merge to Single PDF File',
+                value: 'mergeToPDF',
+                description: 'Convert and merge files to PDF',
+                action: "Merge to PDF"
+            },
             {
                 name: 'PDF Metadata',
                 value: 'pdfMetadata',
@@ -42,4 +63,7 @@ export const description: INodeProperties[] = [
     ...singlePagePDF.description,
     ...pdfMetadata.description,
     ...watermarkPDF.description,
+    ...convertFileToPDF.description,
+    ...mergeToPDF.description,
+    ...compressPDF.description
 ];

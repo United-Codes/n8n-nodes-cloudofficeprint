@@ -1,6 +1,6 @@
 import type { ILoadOptionsFunctions, INodePropertyOptions, } from "n8n-workflow";
 import {
-    getExtensionFromMimeType,
+    // getExtensionFromMimeType,
     supportedOutputTypeBasedOnTemplate
 } from "../utils/file_utils";
 
@@ -19,8 +19,9 @@ export async function getSupportedOutputTypeBasedOnTemplate(this: ILoadOptionsFu
         } else {
             const template_type = this.getNodeParameter('template.fileConfig.mimeType', 0) as string;
             try {
-                const mimeType = getExtensionFromMimeType(template_type);
-                const supportedOutputTypes = supportedOutputTypeBasedOnTemplate[mimeType as keyof typeof supportedOutputTypeBasedOnTemplate];
+                // const mimeType = getExtensionFromMimeType(template_type);
+                // const supportedOutputTypes = supportedOutputTypeBasedOnTemplate[mimeType as keyof typeof supportedOutputTypeBasedOnTemplate];
+                const supportedOutputTypes = supportedOutputTypeBasedOnTemplate[template_type as keyof typeof supportedOutputTypeBasedOnTemplate];
                 options.push(...(supportedOutputTypes?.map(outputType => ({ name: outputType, value: outputType })) || []));
             } catch (error) {
                 reject(error);

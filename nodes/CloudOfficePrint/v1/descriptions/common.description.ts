@@ -15,20 +15,21 @@ export const fileDesc: INodeProperties = {
             name: 'fileConfig',
             displayName: 'File Configuration',
             values: [
-                {
-                    displayName: 'File Source',
-                    name: 'fileSource',
-                    type: 'options',
-                    default: 'url',
-                    options: [
-                        { name: 'URL', value: 'url' },
-                        { name: 'Base64', value: 'base64' },
-                        // { name: 'File Path', value: 'file' },
-                    ],
-                },
+                // {
+                //     displayName: 'File Source',
+                //     name: 'fileSource',
+                //     type: 'options',
+                //     default: 'url',
+                //     options: [
+                //         { name: 'URL', value: 'url' },
+                //         { name: 'Base64', value: 'base64' },
+                //         // { name: 'File Path', value: 'file' },
+                //     ],
+                // },
 
                 {
-                    displayName: 'File Data',
+                    // displayName: 'File Data',
+                    displayName: 'Base64 Encoded File',
                     name: 'fileData',
                     type: 'string',
                     default: '',
@@ -36,28 +37,28 @@ export const fileDesc: INodeProperties = {
                     typeOptions: {
                         rows: 4,
                     },
-                    displayOptions: {
-                        show: {
-                            fileSource: [
-                                'url',
-                                'base64',
-                                // 'file'
-                            ],
-                        },
-                    },
+                    // displayOptions: {
+                    //     show: {
+                    //         fileSource: [
+                    //             // 'url',
+                    //             'base64',
+                    //             // 'file'
+                    //         ],
+                    //     },
+                    // },
                     description:
                         'URL, Base64 content, or file path depending on File Source',
                 },
 
-                {
-                    displayName: 'Filename',
-                    name: 'filename',
-                    type: 'string',
-                    placeholder: 'file.docx',
-                    default: '',
-                    required: true,
-                    description: 'Name of the file including extension',
-                },
+                // {
+                //     displayName: 'Filename',
+                //     name: 'filename',
+                //     type: 'string',
+                //     placeholder: 'file.docx',
+                //     default: '',
+                //     required: true,
+                //     description: 'Name of the file including extension',
+                // },
 
                 {
                     displayName: 'Mime Type',

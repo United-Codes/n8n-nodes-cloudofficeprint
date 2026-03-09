@@ -9,7 +9,7 @@ import {
     JsonObject
 } from 'n8n-workflow';
 
-import { NodeApiError } from 'n8n-workflow';
+import { NodeApiError, LoggerProxy as Logger } from 'n8n-workflow';
 
 /**
  * 
@@ -77,6 +77,12 @@ export async function APEXOfficePrintRequest(
     if (!requestBody || Object.keys(requestBody).length === 0) {
         delete options.body;
     }
+    const outputBody = body.output as { output_type: string };
+
+    Logger.error("Output Type : " + outputBody.output_type)
+    if (outputBody && outputBody.output_type && outputBody.output_type === 'json') {
+        return requestBody;
+    }
 
     try {
         const response = await this.helpers.httpRequest.call(this, options);
@@ -87,9 +93,9 @@ export async function APEXOfficePrintRequest(
             let errorDescription = ""
             if (error.response.headers['error_description']) {
                 errorDescription = error.response.headers['error_description'];
-                try{
+                try {
                     errorDescription = Buffer.from(errorDescription, 'base64').toString('utf-8');
-                }catch{
+                } catch {
                     // do nothing
                 }
                 copErrorFile = error.response.data;
