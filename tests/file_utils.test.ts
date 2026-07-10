@@ -17,13 +17,13 @@ describe('getFilesData', () => {
             { mimeType: 'docx', fileData: 'CCCC' },
         ])).toEqual([
             {
-                name: 'file_1.pdf',
+                filename: 'file_1.pdf',
                 mime_type: 'application/pdf',
                 file_content: 'BBBB',
                 file_source: 'base64',
             },
             {
-                name: 'file_2.docx',
+                filename: 'file_2.docx',
                 mime_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                 file_content: 'CCCC',
                 file_source: 'base64',

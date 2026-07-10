@@ -4,7 +4,7 @@ import { fileDesc } from '../descriptions/common.description';
 type File = {
     file_source: 'base64';
     file_content: string;
-    name: string;
+    filename: string;
     mime_type: string;
 }
 
@@ -156,7 +156,7 @@ export function getFilesData(
     }
 
     return files.map((fileItem, i) => ({
-        name: `file_${i + 1}.${fileItem.mimeType}`,
+        filename: `file_${i + 1}.${fileItem.mimeType}`,
         mime_type: extensionToMime(fileItem.mimeType),
         file_content: fileItem.fileData,
         file_source: 'base64' as const,
