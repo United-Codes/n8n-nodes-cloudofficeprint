@@ -1,16 +1,8 @@
-import type {
-	IDataObject,
-	IExecuteFunctions,
-	INodeProperties,
-} from 'n8n-workflow';
-
-import {
-	updateDisplayOptions,
-	NodeOperationError,
-} from 'n8n-workflow';
+import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
+import { updateDisplayOptions, NodeOperationError } from 'n8n-workflow';
 
 import { APEXOfficePrintRequest } from '../../transport';
-import { getFileDesc, getFilesData } from '../../utils/file_utils';
+import { getFileDesc, getFilesData, appendPrependFileSupportedType, type FileNodeParameters } from '../../utils/file_utils';
 
 export const properties: INodeProperties[] = [
     getFileDesc(
@@ -18,44 +10,45 @@ export const properties: INodeProperties[] = [
         'Files',
         'Files to merge (supports multiple files)',
         true,
-        true
+        true,
+        appendPrependFileSupportedType,
     ),
 ];
 
 const displayOptions = {
-	show: {
-		resource: ['pdfOperations'],
-		operation: ['mergeToPDF'],
-	},
+    show: {
+        resource: ['pdfOperations'],
+        operation: ['mergeToPDF'],
+    },
 };
 
 export const description = updateDisplayOptions(displayOptions, properties);
+
 export async function execute(this: IExecuteFunctions, index: number) {
-    const files = this.getNodeParameter(`template.fileConfig`, index) as { fileSource: string; fileData: string; filename: string; mimeType: string; }[];
+    const files = this.getNodeParameter('file.fileConfig', index, null) as FileNodeParameters[] | null;
     if (!files || files.length === 0) {
-        throw new NodeOperationError(this.getNode(), 'No file configuration found. Please add a file to the input.');
+        throw new NodeOperationError(this.getNode(), 'No files found. Please add at least one file to merge.');
     }
-    const filesData = getFilesData(files);
 
-	const body: IDataObject = {
-		template: filesData,
-		files: [{
-			filename: 'output.pdf',
-			data: [],
-		}],
-		output: {
-			output_type: 'pdf',
-			output_encoding: 'base64',
-		}
-	};
+    // The first file acts as the template; the rest are appended to the output PDF.
+    const [firstFile, ...restFiles] = files;
+    const body: IDataObject = {
+        template: getFilesData(firstFile),
+        append_files: getFilesData(restFiles),
+        files: [{
+            filename: 'output.pdf',
+            data: [],
+        }],
+        output: {
+            output_type: 'pdf',
+            output_encoding: 'base64',
+        },
+    };
 
-	const responseData = await APEXOfficePrintRequest.call(this, 'POST', '', body);
+    const responseData = await APEXOfficePrintRequest.call(this, 'POST', '', body);
 
-	const executionData = this.helpers.constructExecutionMetaData(
-
-		this.helpers.returnJsonArray(responseData as IDataObject),
-		{ itemData: { item: index } },
-	);
-
-	return executionData;
+    return this.helpers.constructExecutionMetaData(
+        this.helpers.returnJsonArray(responseData as IDataObject),
+        { itemData: { item: index } },
+    );
 }
