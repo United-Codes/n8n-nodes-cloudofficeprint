@@ -6,10 +6,9 @@ import {
     ILoadOptionsFunctions,
     IPollFunctions,
     IDataObject,
-    JsonObject
+    JsonObject,
+    NodeApiError,
 } from 'n8n-workflow';
-
-import { NodeApiError, LoggerProxy as Logger } from 'n8n-workflow';
 
 /**
  * 
@@ -39,19 +38,9 @@ export async function APEXOfficePrintRequest(
     const apiUrl = credentials.apiBaseUrl as string;
     const apiKey = credentials.apiKey;
 
-    // const copLoggingData = {}
-    // try{
-    //     const workflowData = this.getWorkflowData();
-    //     copLoggingData.platform = 'COP n8n';
-    //     copLoggingData.workflow_id = workflowData.id;
-    //     copLoggingData.workflow_name = workflowData.name;
-    // }
-
-
     const requestBody: IDataObject = {
         ...body,
         api_key: apiKey,
-        // logging: copLoggingData
     };
 
     const options: IHttpRequestOptions = {
@@ -76,12 +65,6 @@ export async function APEXOfficePrintRequest(
     // Remove body for GET / empty payload
     if (!requestBody || Object.keys(requestBody).length === 0) {
         delete options.body;
-    }
-    const outputBody = body.output as { output_type: string };
-
-    Logger.error("Output Type : " + outputBody.output_type)
-    if (outputBody && outputBody.output_type && outputBody.output_type === 'json') {
-        return requestBody;
     }
 
     try {
