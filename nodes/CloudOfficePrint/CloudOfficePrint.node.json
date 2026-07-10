@@ -5,6 +5,21 @@
 	"categories": [
 		"Utility"
 	],
+	"alias": [
+		"PDF",
+		"DOCX",
+		"XLSX",
+		"PPTX",
+		"Convert",
+		"Compress",
+		"Merge",
+		"Watermark",
+		"Document",
+		"Report",
+		"Template",
+		"AOP",
+		"APEX Office Print"
+	],
 	"resources": {
 		"credentialDocumentation": [
 			{
