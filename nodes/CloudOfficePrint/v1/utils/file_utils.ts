@@ -56,10 +56,6 @@ export const supportedMimeType = {
     "xml": "application/xml"
 }
 
-export const getExtensionFromMimeType = (mimeType: string) => {
-    return Object.keys(supportedMimeType).find(key => supportedMimeType[key as keyof typeof supportedMimeType] === mimeType);
-}
-
 export const supportedOutputTypeBasedOnTemplate: { [key in keyof typeof supportedMimeType]?: string[] } = {
     "docx": ["docx", "doc", "html", "onepagepdf", "pdf", "rtf", "txt", "count_tags", "meta_data", "odt"],
     "docm": ["docx", "doc", "html", "onepagepdf", "pdf", "rtf", "txt", "count_tags", "meta_data", "odt", "docm"],
