@@ -30,11 +30,10 @@ export async function execute(this: IExecuteFunctions, index: number) {
         throw new NodeOperationError(this.getNode(), 'No files found. Please add at least one file to merge.');
     }
 
-    // The first file acts as the template; the rest are appended to the output PDF.
-    const [firstFile, ...restFiles] = files;
     const body: IDataObject = {
-        template: getFilesData(firstFile),
-        append_files: getFilesData(restFiles),
+        // Converter template: all inputs are converted and appended to the output PDF.
+        template: { template_type: 'converter' },
+        append_files: getFilesData(files),
         files: [{
             filename: 'output.pdf',
             data: [],

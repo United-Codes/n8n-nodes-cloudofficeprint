@@ -4,29 +4,24 @@ import type {
     INodeProperties,
 } from 'n8n-workflow';
 
-import { getFileDesc, getFilesData } from '../../utils/file_utils';
-
 import {
     updateDisplayOptions,
     NodeOperationError,
-    // LoggerProxy as Logger
 } from 'n8n-workflow';
 
 import { APEXOfficePrintRequest } from '../../transport';
-
+import { getFileDesc, getFilesData, type FileNodeParameters } from '../../utils/file_utils';
 
 export const properties: INodeProperties[] = [
     getFileDesc(
         'template',
         'File',
-        'File to process',
+        'PDF file to read metadata from',
         false,
-        true)
+        true,
+        ['pdf'],
+    ),
 ];
-// TODO:
-// - [ ] For template show the file region always
-// - [ ] For file template type should be PDF
-
 
 const displayOptions = {
     show: {
@@ -38,16 +33,12 @@ const displayOptions = {
 export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions, index: number) {
-    let template = {};
-    try {
-        const files = this.getNodeParameter('template.fileConfig', index) as { fileSource: string; fileData: string; filename: string; mimeType: string; }[];
-        template = getFilesData(files);
-    } catch (error) {
-        if(error instanceof Error && error.message.includes('Could not get parameter')) {
-            throw new NodeOperationError(this.getNode(), 'No file configuration found. Please add a file to the input.');
-        }
-        throw new error;
+    const files = this.getNodeParameter('template.fileConfig', index, null) as FileNodeParameters | null;
+    if (!files) {
+        throw new NodeOperationError(this.getNode(), 'No file configuration found. Please add a file to the input.');
     }
+    const template = getFilesData(files);
+
     const body: IDataObject = {
         template: template,
         files: [{
@@ -55,7 +46,7 @@ export async function execute(this: IExecuteFunctions, index: number) {
             data: [],
         }],
         output: {
-            output_type: "meta_data",
+            output_type: 'meta_data',
             output_encoding: 'raw',
         }
     };

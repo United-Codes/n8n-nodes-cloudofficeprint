@@ -10,7 +10,7 @@ import {
 } from 'n8n-workflow';
 
 import { APEXOfficePrintRequest } from '../../transport';
-import { getFileDesc, getFilesData } from '../../utils/file_utils';
+import { getFileDesc, getFilesData, appendPrependFileSupportedType, type FileNodeParameters } from '../../utils/file_utils';
 
 export const properties: INodeProperties[] = [
     getFileDesc(
@@ -18,7 +18,8 @@ export const properties: INodeProperties[] = [
         'File',
         'File to process (supports multiple files)',
         true,
-        true
+        true,
+        appendPrependFileSupportedType,
     ),
     {
         displayName: 'Watermark Text',
@@ -72,7 +73,7 @@ const displayOptions = {
 
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
-    const files = this.getNodeParameter(`file.fileConfig`, index) as { fileSource: string; fileData: string; filename: string; mimeType: string; }[];
+    const files = this.getNodeParameter('file.fileConfig', index, null) as FileNodeParameters[] | null;
     if (!files || files.length === 0) {
         throw new NodeOperationError(this.getNode(), 'No file configuration found. Please add a file to the input.');
     }

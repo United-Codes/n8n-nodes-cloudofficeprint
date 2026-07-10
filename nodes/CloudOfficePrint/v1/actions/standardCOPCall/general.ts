@@ -4,19 +4,18 @@ import type {
     INodeProperties,
 } from 'n8n-workflow';
 
-import { getFileDesc, getFilesData } from '../../utils/file_utils';
+import { getFileDesc, getFilesData, templateSupportedType, type FileNodeParameters } from '../../utils/file_utils';
 
 import {
     updateDisplayOptions,
     NodeOperationError,
-    // LoggerProxy as Logger
 } from 'n8n-workflow';
 
 import { APEXOfficePrintRequest } from '../../transport';
 import { outputTypeDesc } from '../../descriptions/common.description';
 
 export const properties: INodeProperties[] = [
-    getFileDesc('template', 'Template', 'Template file to use', false),
+    getFileDesc('template', 'Template', 'Template file to use', false, true, templateSupportedType),
     {
         displayName: 'Data (JSON)',
         name: 'data',
@@ -44,14 +43,8 @@ const displayOptions = {
 
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
-    let template;
-    try {
-        const files = this.getNodeParameter('template.fileConfig', index) as { fileSource: string; fileData: string; filename: string; mimeType: string; }[];
-        template = getFilesData(files);
-    } catch (error) {
-        // No template is added
-        template = null;
-    }
+    const files = this.getNodeParameter('template.fileConfig', index, null) as FileNodeParameters | null;
+    const template = files ? getFilesData(files) : null;
     const data = this.getNodeParameter('data', index) as string;
     const dataObject = JSON.parse(data);
     if (!dataObject) {
