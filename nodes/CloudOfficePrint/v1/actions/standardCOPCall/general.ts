@@ -54,10 +54,11 @@ export async function execute(this: IExecuteFunctions, index: number) {
     if (!dataObject) {
         throw new NodeOperationError(this.getNode(), 'No data found. Please add data to the input.');
     }
+    const outputFileName = this.getNodeParameter('outputFileName', index) as string;
     const body: IDataObject = {
         template: template,
         files: [{
-            filename: 'input.pdf',
+            filename: outputFileName,
             data: dataObject,
         }],
         output: {
@@ -65,7 +66,6 @@ export async function execute(this: IExecuteFunctions, index: number) {
             output_encoding: 'base64',
         }
     };
-    // const responseData = body
     const responseData = await APEXOfficePrintRequest.call(this, 'POST', '', body);
 
     const executionData = this.helpers.constructExecutionMetaData(
