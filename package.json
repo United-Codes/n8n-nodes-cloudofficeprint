@@ -18,10 +18,11 @@
 	"scripts": {
 		"build": "n8n-node build",
 		"build:watch": "tsc --watch",
-        "prepare": "npm run build",
+		"prepare": "npm run build",
 		"dev": "n8n-node dev",
 		"lint": "n8n-node lint",
 		"lint:fix": "n8n-node lint --fix",
+		"test": "vitest run",
 		"release": "n8n-node release",
 		"prepublishOnly": "n8n-node prerelease"
 	},
@@ -44,13 +45,11 @@
 		"eslint": "9.32.0",
 		"prettier": "3.6.2",
 		"release-it": "^19.0.4",
-		"typescript": "5.9.2"
+		"typescript": "5.9.2",
+		"vitest": "^4.1.10"
 	},
 	"peerDependencies": {
 		"n8n-workflow": "*"
 	},
-	"packageManager": "pnpm@10.28.0+sha512.05df71d1421f21399e053fde567cea34d446fa02c76571441bfc1c7956e98e363088982d940465fd34480d4d90a0668bc12362f8aa88000a64e83d0b0e47be48",
-	"dependencies": {
-		"n8n-nodes-cloudofficeprint": "link:C:/Users/rabin/AppData/Local/pnpm/global/5/node_modules/n8n-nodes-cloudofficeprint"
-	}
+	"packageManager": "pnpm@10.28.0+sha512.05df71d1421f21399e053fde567cea34d446fa02c76571441bfc1c7956e98e363088982d940465fd34480d4d90a0668bc12362f8aa88000a64e83d0b0e47be48"
 }
