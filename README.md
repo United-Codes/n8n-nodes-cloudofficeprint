@@ -1,16 +1,14 @@
 # n8n-nodes-cloudofficeprint
 
-This is an n8n community node. It lets you use **Cloud Office Print** in your n8n workflows.
+This is an n8n community node. It lets you use **Cloud Office Print** (APEX Office Print) in your n8n workflows.
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
 [Installation](#installation)  
 [Operations](#operations)  
-[Credentials](#credentials)  <!-- delete if no auth needed -->  
+[Credentials](#credentials)  
 [Compatibility](#compatibility)  
-[Usage](#usage)  <!-- delete if not using this section -->  
 [Resources](#resources)  
-[Version history](#version-history)  <!-- delete if not using this section -->  
 
 ## Installation
 
@@ -18,16 +16,26 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 ## Operations
 
-1. PDF Operations
-Lets you perform following operations on the PDF
-- PDF/A compliance
-- PDF/UA standard
-- Password protect PDF
-- Remove last page
-- Single Page PDF
-- Watermark
+1. Document Generation
+- Document Generation with template
+    + Ability to specify template, data and output type
 
-2. Processing/Conversion of the Office files/HTML/PDF based on the template provided.
+2. PDF Operations
+- Get PDF metadata
+- Add Watermark to PDF
+- Convert to a single Page PDF
+- Convert a file to PDF
+- Merge multiple files into a single PDF
+- Compress a PDF
+
+3. Password Protect Document
+- Password Protect Office Files
+- Protect a PDF
+
+4. PDF Compare
+- Compare two PDFs
+
+All file inputs are provided as Base64-encoded content together with the file type.
 
 ## Credentials
 
@@ -35,21 +43,9 @@ Signup and get the API key from [CloudOfficePrint](https://www.united-codes.com/
 
 ## Compatibility
 
-_State the minimum n8n version, as well as which versions you test against. You can also include any known version incompatibility issues._
-
-## Usage
-
-_This is an optional section. Use it to help users with any difficult or confusing aspects of the node._
-
-_By the time users are looking for community nodes, they probably already know n8n basics. But if you expect new users, you can link to the [Try it out](https://docs.n8n.io/try-it-out/) documentation to help them get started._
+Requires n8n version 1.x and Node.js 18 or newer.
 
 ## Resources
 
 * [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
-* _Link to app/service documentation._
-
-## Version history
-
-_This is another optional section. If your node has multiple versions, include a short description of available versions and what changed, as well as any compatibility impact._
-
-
+* [Cloud Office Print documentation](https://www.apexofficeprint.com/docs/)

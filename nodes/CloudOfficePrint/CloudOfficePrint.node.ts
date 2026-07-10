@@ -10,8 +10,8 @@ export class CloudOfficePrint extends VersionedNodeType {
             name: 'cloudOfficePrint',
             group: ['transform'],
             icon: {
-                light: 'file:icons/cop.svg',
-                dark: 'file:icons/cop.dark.svg'
+                light: 'file:v1/cop.svg',
+                dark: 'file:v1/cop.dark.svg'
             },
 			subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
             description: 'Generate and Convert documents with Cloud Office Print. Supports PDF, HTML, DOCX, XLSX, PPTX, and more.',

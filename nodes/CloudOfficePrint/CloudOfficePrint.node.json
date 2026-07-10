@@ -1,19 +1,19 @@
 {
-	"node": "n8n-nodes-base.CloudOfficePrint",
+	"node": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": [
-		"Miscellaneous"
+		"Utility"
 	],
 	"resources": {
 		"credentialDocumentation": [
 			{
-				"url": ""
+				"url": "https://www.apexofficeprint.com/docs/"
 			}
 		],
 		"primaryDocumentation": [
 			{
-				"url": ""
+				"url": "https://www.apexofficeprint.com/docs/"
 			}
 		]
 	}

@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"description": "CloudOfficePrint nodes for n8n",
 	"license": "MIT",
-	"homepage": "",
+	"homepage": "https://github.com/united-codes/n8n-nodes-cloudofficeprint",
 	"keywords": [
 		"n8n-community-node-package"
 	],

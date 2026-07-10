@@ -10,10 +10,6 @@ export const description: INodeTypeDescription = {
 	displayName: 'Cloud Office Print',
 	name: 'cloudOfficePrint',
 	group: ['transform'],
-	icon: {
-		light: 'file:cop.svg',
-		dark: 'file:cop.dark.svg'
-	},
 	subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 	description: 'Generate/convert/edit/manage documents with Cloud Office Print',
 	version: 1,

@@ -1,25 +1,26 @@
-/* eslint-disable @n8n/community-nodes/icon-validation */
 import {
     IAuthenticateGeneric,
-    Icon,
+    ICredentialTestRequest,
     ICredentialType,
+    Icon,
     INodeProperties,
 } from 'n8n-workflow';
 
-// eslint-disable-next-line @n8n/community-nodes/credential-test-required
 export class CloudOfficePrintApi implements ICredentialType {
     name = 'copApi';
     displayName = 'Cloud Office Print API';
-    // Uses the link to this tutorial as an example
-    // Replace with your own docs links when building your own nodes
-    documentationUrl = 'https://apexofficeprint.com/docs/api/';
-    icon: Icon = { light: 'file:../icons/cop.svg', dark: 'file:../icons/cop.dark.svg' }
+    documentationUrl = 'https://www.apexofficeprint.com/docs/';
+    icon: Icon = {
+        light: 'file:../nodes/CloudOfficePrint/v1/cop.svg',
+        dark: 'file:../nodes/CloudOfficePrint/v1/cop.dark.svg',
+    };
     properties: INodeProperties[] = [
         {
             displayName: 'API Key',
             name: 'apiKey',
             type: 'string',
             default: '',
+            required: true,
             typeOptions: { password: true },
         },
         {
@@ -37,6 +38,13 @@ export class CloudOfficePrintApi implements ICredentialType {
             qs: {
                 'api_key': '={{$credentials.apiKey}}'
             },
+        },
+    };
+    test: ICredentialTestRequest = {
+        request: {
+            baseURL: '={{$credentials.apiBaseUrl}}',
+            url: '/marco',
+            method: 'GET',
         },
     };
 }

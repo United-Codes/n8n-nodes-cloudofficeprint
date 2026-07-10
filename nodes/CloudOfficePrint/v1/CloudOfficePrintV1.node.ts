@@ -1,3 +1,4 @@
+// The icon is inherited from the versioned base description in CloudOfficePrint.node.ts.
 /* eslint-disable @n8n/community-nodes/icon-validation */
 import type {
     IExecuteFunctions,
