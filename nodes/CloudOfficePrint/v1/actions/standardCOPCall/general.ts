@@ -22,7 +22,9 @@ export const properties: INodeProperties[] = [
         type: 'json',
         default: '{}',
         required: true,
-        description: 'JSON data for processing',
+        placeholder: '{ "customer": "John Doe" }',
+        description: 'JSON data used to fill the tags in the template',
+        hint: 'Keys must match the tag names used in the template',
     },
     {
         displayName: 'Output File Name',
@@ -30,6 +32,8 @@ export const properties: INodeProperties[] = [
         type: 'string',
         default: 'output',
         required: true,
+        placeholder: 'e.g. invoice',
+        description: 'Name for the generated file, without extension',
     },
     outputTypeDesc,
 ];

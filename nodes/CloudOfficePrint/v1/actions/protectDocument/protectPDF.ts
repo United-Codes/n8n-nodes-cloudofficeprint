@@ -24,7 +24,7 @@ export const properties: INodeProperties[] = [
     {
         displayName: 'Read Password',
         name: 'read_password',
-        description: 'Password to read the PDF',
+        description: 'Password required to open the PDF (leave empty to skip)',
         // eslint-disable-next-line n8n-nodes-base/node-param-type-options-password-missing
         type: 'string',
         default: '',
@@ -32,7 +32,7 @@ export const properties: INodeProperties[] = [
     {
         displayName: 'Modify Password',
         name: 'modify_password',
-        description: 'Password to modify the PDF',
+        description: 'Password required to edit the PDF (leave empty to skip)',
         // eslint-disable-next-line n8n-nodes-base/node-param-type-options-password-missing
         type: 'string',
         default: '',

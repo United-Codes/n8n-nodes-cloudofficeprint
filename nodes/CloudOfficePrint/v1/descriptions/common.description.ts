@@ -24,7 +24,9 @@ export const fileDesc: INodeProperties = {
                     typeOptions: {
                         rows: 4,
                     },
-                    description: 'Base64-encoded content of the file',
+                    placeholder: 'e.g. JVBERi0xLjcKJcTl8uXr...',
+                    description: 'Content of the file encoded as Base64',
+                    hint: 'Paste the raw Base64 string only, without a data:...;base64, prefix',
                 },
                 {
                     displayName: 'File Type',
@@ -33,7 +35,8 @@ export const fileDesc: INodeProperties = {
                     default: '',
                     options: [],
                     required: true,
-                    description: 'Type of the provided file',
+                    description: 'File type of the provided content',
+                    hint: 'Must match the actual type of the Base64 content',
                 },
             ],
         },

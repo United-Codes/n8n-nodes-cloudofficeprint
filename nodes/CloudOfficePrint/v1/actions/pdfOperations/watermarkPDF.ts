@@ -24,7 +24,8 @@ export const properties: INodeProperties[] = [
     {
         displayName: 'Watermark Text',
         name: 'watermark_text',
-        description: 'Text to use as watermark',
+        description: 'Text placed diagonally across every page',
+        placeholder: 'e.g. CONFIDENTIAL',
         type: 'string',
         default: '',
     }, {
