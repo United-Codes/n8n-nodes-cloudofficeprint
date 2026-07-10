@@ -4,8 +4,8 @@ import type {
     INodeProperties,
 } from 'n8n-workflow';
 
-import { getFileDesc, getFilesData, type FileNodeParameters } from '../../utils/file_utils';
-import type { Template } from '../../utils/file_utils';
+import { getFileDesc, getFilesData, type FileNodeParameters, Template  } from '../../utils/file_utils';
+
 
 import {
     updateDisplayOptions,

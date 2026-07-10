@@ -41,10 +41,10 @@ export const fileDesc: INodeProperties = {
 };
 
 export const outputTypeDesc: INodeProperties = {
-    displayName: 'Output Type',
+    displayName: 'Output Type Name or ID',
     name: 'outputType',
     type: 'options',
-    description: 'Output type for the given request',
+    description: 'Output type for the given request. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
     default: '',
     required: true,
     typeOptions: {

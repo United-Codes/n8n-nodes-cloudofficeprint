@@ -16,10 +16,10 @@ export const description: INodeProperties[] = [
         },
         options: [
             {
-                name: 'Compare two pdf',
+                name: 'Compare Two PDF Files',
                 value: 'pdfCompare',
-                description: 'Compare two pdf',
-                action: 'Compare two pdf',
+
+                action: 'Compare two PDF files',
             }
         ],
         default: 'pdfCompare',
