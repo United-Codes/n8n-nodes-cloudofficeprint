@@ -21,9 +21,7 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
     + Ability to specify template, data and output type
 
 2. PDF Operations
-- Get PDF metadata
 - Add Watermark to PDF
-- Convert to a single Page PDF
 - Convert a file to PDF
 - Merge multiple files into a single PDF
 - Compress a PDF
