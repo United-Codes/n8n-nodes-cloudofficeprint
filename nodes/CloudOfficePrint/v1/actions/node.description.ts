@@ -11,7 +11,7 @@ export const description: INodeTypeDescription = {
 	name: 'cloudOfficePrint',
 	group: ['transform'],
 	subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-	description: 'Generate/convert/edit/manage documents with Cloud Office Print',
+	description: 'Comprehensive document generation and PDF processing: create documents from templates, convert files to PDF, merge, compress, watermark, password protect and compare PDFs with the Cloud Office Print API',
 	version: 1,
 	defaultVersion: 1,
 	defaults: {

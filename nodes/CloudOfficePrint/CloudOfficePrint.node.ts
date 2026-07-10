@@ -14,7 +14,7 @@ export class CloudOfficePrint extends VersionedNodeType {
                 dark: 'file:v1/cop.dark.svg'
             },
 			subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-            description: 'Generate and Convert documents with Cloud Office Print. Supports PDF, HTML, DOCX, XLSX, PPTX, and more.',
+            description: 'Comprehensive document generation and PDF processing: create documents from templates, convert files to PDF, merge, compress, watermark, password protect and compare PDFs with the Cloud Office Print API',
             defaultVersion: 1,
         };
 
