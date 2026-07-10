@@ -31,7 +31,7 @@ export async function execute(this: IExecuteFunctions, index: number) {
     }
 
     const body: IDataObject = {
-        // Converter template: all inputs are converted and appended to the output PDF.
+        // converter template: inputs are converted and appended to the output PDF
         template: { template_type: 'converter' },
         append_files: getFilesData(files),
         files: [{

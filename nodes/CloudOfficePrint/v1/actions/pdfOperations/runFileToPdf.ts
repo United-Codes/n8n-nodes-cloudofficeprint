@@ -4,10 +4,7 @@ import { NodeOperationError } from 'n8n-workflow';
 import { APEXOfficePrintRequest } from '../../transport';
 import { getFilesData, type FileNodeParameters } from '../../utils/file_utils';
 
-/**
- * Shared executor for operations that send a single input file and
- * receive a PDF back (convert, compress, single page, ...).
- */
+/** Shared executor for single-file to PDF operations. */
 export async function runFileToPdf(
     ctx: IExecuteFunctions,
     index: number,

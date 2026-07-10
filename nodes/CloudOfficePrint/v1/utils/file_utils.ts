@@ -15,9 +15,9 @@ export type Template = {
 }
 
 export type FileNodeParameters = {
-    /** Extension key of supportedMimeType selected in the File Type dropdown, e.g. "docx" */
+    /** File extension, e.g. "docx" */
     mimeType: string;
-    /** Base64-encoded file content */
+    /** Base64 file content */
     fileData: string;
 }
 
@@ -77,16 +77,7 @@ export const appendPrependFileSupportedType = ["pdf", "docx", "docm", "xlsx", "p
 export const templateSupportedType = ["docx", "docm", "xlsx", "xlsm", "pptx", "pptm", "html", "md", "txt", "csv", "pdf", "ics", "ifb", "xml"];
 export const subtemplatesSupportedType = ["docx", "pptx"];
 
-/**
- *
- * @param name - The parameter name of the file collection
- * @param displayName - The display name of the file collection
- * @param description - The description of the file collection
- * @param enableMultipleValues - Whether the collection accepts multiple files
- * @param required - Whether the file is required
- * @param allowedTypes - Extensions offered in the File Type dropdown (keys of supportedMimeType)
- * @returns The file description
- */
+/** Builds a file collection property with the given allowed file types. */
 export function getFileDesc(
     name: 'file' | 'template' | 'subtemplate' | 'compare_file1' | 'compare_file2',
     displayName: string,
@@ -129,9 +120,8 @@ function extensionToMime(extension: string): string {
 }
 
 /**
- * Converts fileConfig node parameters into AOP payload objects.
- * Single object -> Template (for the "template" slot of the request body).
- * Array -> File[] (base64 file entries, e.g. append/prepend/merge inputs).
+ * Converts fileConfig parameters into AOP payload objects:
+ * a single object becomes a Template, an array becomes base64 File entries.
  */
 export function getFilesData(
     fileNodeParameters: FileNodeParameters[] | FileNodeParameters,
@@ -143,7 +133,7 @@ export function getFilesData(
 
     if (!Array.isArray(files)) {
         const extension = files.mimeType;
-        extensionToMime(extension); // validates the extension
+        extensionToMime(extension); // validate
         return {
             filename: `template.${extension}`,
             template_type: extension,
