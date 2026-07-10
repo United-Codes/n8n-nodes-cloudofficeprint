@@ -20,7 +20,6 @@ export class CloudOfficePrintApi implements ICredentialType {
             name: 'apiKey',
             type: 'string',
             default: '',
-            required: true,
             typeOptions: { password: true },
             description: 'API key from your Cloud Office Print account',
         },
