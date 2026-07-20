@@ -1,12 +1,15 @@
 # n8n-nodes-cloudofficeprint
 
-This is an n8n community node. It lets you use **Cloud Office Print** (APEX Office Print) in your n8n workflows.
+This is an n8n community node. It lets you use **Cloud Office Print** in your n8n workflows.
+
+Cloud Office Print generates and manipulates PDF and Office documents: fill templates with data, convert files to PDF, merge, compress and watermark PDFs, password-protect documents, and compare PDFs.
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
 [Installation](#installation)  
 [Operations](#operations)  
 [Credentials](#credentials)  
+[Usage](#usage)  
 [Compatibility](#compatibility)  
 [Resources](#resources)  
 
@@ -17,18 +20,17 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 ## Operations
 
 1. Document Generation
-- Document Generation with template
-    + Ability to specify template, data and output type
+- Generate a document from a template, with data and an output type of your choice
 
 2. PDF Operations
-- Add Watermark to PDF
 - Convert a file to PDF
-- Merge multiple files into a single PDF
 - Compress a PDF
+- Merge multiple files into a single PDF
+- Add a watermark to a PDF
 
 3. Password Protect Document
-- Password Protect Office Files
-- Protect a PDF
+- Password protect an Office file
+- Password protect a PDF
 
 4. PDF Compare
 - Compare two PDFs
@@ -37,7 +39,15 @@ All file inputs are provided as Base64-encoded content together with the file ty
 
 ## Credentials
 
-Signup and get the API key from [CloudOfficePrint](https://www.united-codes.com/products/cloudofficeprint/).
+Sign up and get an API key from [Cloud Office Print](https://www.united-codes.com/products/cloudofficeprint/), then create a **Cloud Office Print API** credential in n8n with:
+
+- **API Key** – your Cloud Office Print API key
+- **API Base URL** – the Cloud Office Print API endpoint (defaults to `https://api.cloudofficeprint.com`)
+- **Mode** – `Production` or `Development`; Development marks requests with `mode: development`, useful when testing against a trial or development license
+
+## Usage
+
+Every operation has a **Debug Mode** toggle. Enable it to return the request payload that would otherwise be sent to Cloud Office Print instead of sending it — useful for troubleshooting or when reaching out to support.
 
 ## Compatibility
 
