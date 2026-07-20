@@ -3,8 +3,9 @@ import { supportedOutputTypeBasedOnTemplate } from '../utils/file_utils';
 
 export async function getSupportedOutputTypeBasedOnTemplate(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
     const templateType = this.getNodeParameter('template.fileConfig.mimeType', 0) as string;
+    let options: INodePropertyOptions[];
     if (!templateType) {
-        return [
+        options = [
             { name: 'DOCX', value: 'docx' },
             { name: 'XLSX', value: 'xlsx' },
             { name: 'PPTX', value: 'pptx' },
@@ -13,7 +14,10 @@ export async function getSupportedOutputTypeBasedOnTemplate(this: ILoadOptionsFu
             { name: 'TXT', value: 'txt' },
             { name: 'CSV', value: 'csv' },
         ];
+    } else {
+        const supportedOutputTypes = supportedOutputTypeBasedOnTemplate[templateType as keyof typeof supportedOutputTypeBasedOnTemplate];
+        options = supportedOutputTypes?.map((outputType) => ({ name: outputType, value: outputType })) ?? [];
     }
-    const supportedOutputTypes = supportedOutputTypeBasedOnTemplate[templateType as keyof typeof supportedOutputTypeBasedOnTemplate];
-    return supportedOutputTypes?.map((outputType) => ({ name: outputType, value: outputType })) ?? [];
+    options.push({ name: 'JSON (Debug)', value: 'json' });
+    return options;
 }

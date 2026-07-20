@@ -69,6 +69,14 @@ export async function APEXOfficePrintRequest(
         delete options.body;
     }
 
+    // JSON (Debug) output: return the request payload instead of calling the API
+    if ((body.output as IDataObject | undefined)?.output_type === 'json') {
+        return {
+            ...requestBody,
+            api_key: apiKey ? '<redacted>' : '',
+        };
+    }
+
     try {
         const response = await this.helpers.httpRequest.call(this, options);
         return response;
