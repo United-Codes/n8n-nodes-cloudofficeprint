@@ -98,7 +98,15 @@ export function getFileDesc(
 
     const collection = desc.options?.[0] as INodePropertyCollection;
     const mimeField = collection.values.find((value) => value.name === 'mimeType') as INodeProperties;
-    mimeField.options = allowedTypes.map((extension) => ({ name: extension, value: extension }));
+    if (allowedTypes.length === 1) {
+        // single supported type: no need to show a select
+        mimeField.type = 'hidden';
+        mimeField.default = allowedTypes[0];
+        delete mimeField.options;
+        delete mimeField.hint;
+    } else {
+        mimeField.options = allowedTypes.map((extension) => ({ name: extension, value: extension }));
+    }
 
     return {
         ...desc,

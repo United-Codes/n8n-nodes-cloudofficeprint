@@ -52,16 +52,24 @@ function mimeField(desc: INodeProperties) {
 
 describe('getFileDesc', () => {
     it('returns independent copies so type options do not leak across operations', () => {
-        const a = getFileDesc('template', 'Template', 'x', false, true, ['docx']);
-        const b = getFileDesc('file', 'Files', 'y', true, true, ['pdf']);
-        expect(mimeField(a).options).toEqual([{ name: 'docx', value: 'docx' }]);
-        expect(mimeField(b).options).toEqual([{ name: 'pdf', value: 'pdf' }]);
+        const a = getFileDesc('template', 'Template', 'x', false, true, ['docx', 'xlsx']);
+        const b = getFileDesc('file', 'Files', 'y', true, true, ['pdf', 'html']);
+        expect(mimeField(a).options).toEqual([{ name: 'docx', value: 'docx' }, { name: 'xlsx', value: 'xlsx' }]);
+        expect(mimeField(b).options).toEqual([{ name: 'pdf', value: 'pdf' }, { name: 'html', value: 'html' }]);
         // a must not have been clobbered by building b
-        expect(mimeField(a).options).toEqual([{ name: 'docx', value: 'docx' }]);
+        expect(mimeField(a).options).toEqual([{ name: 'docx', value: 'docx' }, { name: 'xlsx', value: 'xlsx' }]);
     });
 
     it('limits single-value fields to exactly one entry', () => {
-        const a = getFileDesc('template', 'Template', 'x', false, true, ['docx']);
+        const a = getFileDesc('template', 'Template', 'x', false, true, ['docx', 'xlsx']);
         expect(a.typeOptions).toEqual({ multipleValues: false, minValue: 1, maxValue: 1 });
+    });
+
+    it('hides the type select when only one type is supported', () => {
+        const a = getFileDesc('template', 'File', 'x', false, true, ['pdf']);
+        const field = mimeField(a);
+        expect(field.type).toBe('hidden');
+        expect(field.default).toBe('pdf');
+        expect(field.options).toBeUndefined();
     });
 });
