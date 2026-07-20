@@ -37,10 +37,12 @@ export async function APEXOfficePrintRequest(
 
     const apiUrl = credentials.apiBaseUrl as string;
     const apiKey = credentials.apiKey;
+    const mode = credentials.mode as string;
 
     const requestBody: IDataObject = {
         ...body,
         api_key: apiKey,
+        ...(mode === 'development' && { mode: 'development' }),
     };
 
     const options: IHttpRequestOptions = {

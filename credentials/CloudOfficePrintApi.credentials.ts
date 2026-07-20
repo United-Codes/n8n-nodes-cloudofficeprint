@@ -30,6 +30,17 @@ export class CloudOfficePrintApi implements ICredentialType {
             default: 'https://api.cloudofficeprint.com',
             required: true,
             description: 'The base URL of the Cloud Office Print API',
+        },
+        {
+            displayName: 'Mode',
+            name: 'mode',
+            type: 'options',
+            default: 'production',
+            options: [
+                { name: 'Development', value: 'development' },
+                { name: 'Production', value: 'production' },
+            ],
+            description: 'In development mode, requests are marked with mode: development',
         }
     ];
     authenticate: IAuthenticateGeneric = {
