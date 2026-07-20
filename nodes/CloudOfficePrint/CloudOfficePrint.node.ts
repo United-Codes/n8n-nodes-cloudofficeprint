@@ -62,6 +62,13 @@ export class CloudOfficePrint implements INodeType {
             ...pdfOperations.description,
             ...protectDocument.description,
             ...pdfCompare.description,
+            {
+                displayName: 'Debug Mode',
+                name: 'debugMode',
+                type: 'boolean',
+                default: false,
+                description: 'Whether to return the request payload as JSON instead of sending it to Cloud Office Print. Attach this payload when contacting support.',
+            },
         ],
     };
 

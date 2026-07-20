@@ -18,6 +18,5 @@ export async function getSupportedOutputTypeBasedOnTemplate(this: ILoadOptionsFu
         const supportedOutputTypes = supportedOutputTypeBasedOnTemplate[templateType as keyof typeof supportedOutputTypeBasedOnTemplate];
         options = supportedOutputTypes?.map((outputType) => ({ name: outputType, value: outputType })) ?? [];
     }
-    options.push({ name: 'JSON (Debug)', value: 'json' });
     return options;
 }

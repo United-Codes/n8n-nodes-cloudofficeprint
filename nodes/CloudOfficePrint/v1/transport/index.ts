@@ -69,8 +69,14 @@ export async function APEXOfficePrintRequest(
         delete options.body;
     }
 
-    // JSON (Debug) output: return the request payload instead of calling the API
-    if ((body.output as IDataObject | undefined)?.output_type === 'json') {
+    // Debug mode: return the request payload instead of calling the API
+    let debugMode = false;
+    try {
+        debugMode = (this as IExecuteFunctions).getNodeParameter('debugMode', 0, false) as boolean;
+    } catch {
+        // parameter not available in this context (e.g. load options)
+    }
+    if (debugMode) {
         return {
             ...requestBody,
             api_key: apiKey ? '<redacted>' : '',
