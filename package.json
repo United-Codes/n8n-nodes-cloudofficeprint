@@ -5,7 +5,12 @@
 	"license": "MIT",
 	"homepage": "https://github.com/united-codes/n8n-nodes-cloudofficeprint",
 	"keywords": [
-		"n8n-community-node-package"
+		"n8n-community-node-package",
+		"cloudofficeprint",
+		"apex-office-print",
+		"pdf",
+		"document-generation",
+		"document-automation"
 	],
 	"author": {
 		"name": "CloudOfficePrint",
