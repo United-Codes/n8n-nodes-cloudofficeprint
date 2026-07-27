@@ -58,10 +58,10 @@ Requires n8n version 1.x and Node.js 18 or newer.
 
 Import these into n8n to try each resource out (**Workflows > Import from File**):
 
-* [Document Generation](docs/example/Example%20Cloud%20Office%20Print%20-%20document%20generation.json)
-* [PDF Operations](docs/example/Example%20Cloud%20Office%20Print%20-%20PDF%20Opreation.json)
-* [Password Protect Document](docs/example/Example%20for%20Password%20protect.json)
-* [PDF Compare](docs/example/Example%20for%20Compare%20PDF.json)
+* [Document Generation](docs\example\workflow_cop_document_generation_google_drive_sheets.json)
+* [PDF Operations](docs\example\workflow_cop_pdf_operations_google_drive.json)
+* [Password Protect Document](docs\example\workflow_cop_password_protect_google_drive_sheets.json)
+* [PDF Compare](docs\example\workflow_cop_pdf_compare_google_drive.json)
 
 ## Resources
 
