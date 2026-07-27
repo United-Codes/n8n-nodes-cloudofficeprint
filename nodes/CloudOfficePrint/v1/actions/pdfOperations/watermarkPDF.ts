@@ -16,8 +16,8 @@ export const properties: INodeProperties[] = [
     getFileDesc(
         'file',
         'File',
-        'File to process (supports multiple files)',
-        true,
+        'File to add a watermark to',
+        false,
         true,
         appendPrependFileSupportedType,
     ),
@@ -74,11 +74,11 @@ const displayOptions = {
 
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
-    const files = this.getNodeParameter('file.fileConfig', index, null) as FileNodeParameters[] | null;
-    if (!files || files.length === 0) {
+    const file = this.getNodeParameter('file.fileConfig', index, null) as FileNodeParameters | null;
+    if (!file) {
         throw new NodeOperationError(this.getNode(), 'No file configuration found. Please add a file to the input.');
     }
-    const filesData = getFilesData(files);
+    const filesData = getFilesData([file]);
 
     const watermarkText = this.getNodeParameter('watermark_text', index) as string;
     const watermarkColor = this.getNodeParameter('watermark_color', index) as string;
