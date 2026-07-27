@@ -1,5 +1,4 @@
 import {
-    IAuthenticateGeneric,
     ICredentialTestRequest,
     ICredentialType,
     Icon,
@@ -43,14 +42,7 @@ export class CloudOfficePrintApi implements ICredentialType {
             description: 'In development mode, requests are marked with mode: development',
         }
     ];
-    authenticate: IAuthenticateGeneric = {
-        type: 'generic',
-        properties: {
-            qs: {
-                'api_key': '={{$credentials.apiKey}}'
-            },
-        },
-    };
+    // no authenticate block: the api key is sent in the request body by the node
     test: ICredentialTestRequest = {
         request: {
             baseURL: '={{$credentials.apiBaseUrl}}',
