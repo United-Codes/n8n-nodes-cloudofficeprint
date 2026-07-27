@@ -1,0 +1,10 @@
+cust_first_name,cust_last_name,cust_city,order_name,product_name,quantity,unit_price
+Albertos,Lambert,St. Louis,Order 1,Business Shirt,3,50
+Albertos,Lambert,St. Louis,Order 1,Trousers,2,80
+Albertos,Lambert,St. Louis,Order 1,Jacket,2,150
+Albertos,Lambert,St. Louis,Order 1,Blouse,3,60
+Albertos,Lambert,St. Louis,Order 1,Skirt,2,80
+Marie,Dubois,Antwerp,Order 1,Business Shirt,5,50
+Marie,Dubois,Antwerp,Order 1,Jacket,1,150
+Marie,Dubois,Antwerp,Order 2,Skirt,4,80
+Marie,Dubois,Antwerp,Order 2,Blouse,2,60
