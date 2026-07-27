@@ -62,6 +62,7 @@ Import these into n8n to try each resource out (**Workflows > Import from File**
 * [PDF Operations](docs/example/workflow_cop_pdf_operations_google_drive.json)
 * [Password Protect Document](docs/example/workflow_cop_password_protect_google_drive_sheets.json)
 * [PDF Compare](docs/example/workflow_cop_pdf_compare_google_drive.json)
+* [Basic Document Generation](docs/example/workflow_cop_document_generation_xlsx_basic.json)
 
 ## Resources
 
