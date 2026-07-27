@@ -11,6 +11,7 @@ Cloud Office Print generates and manipulates PDF and Office documents: fill temp
 [Credentials](#credentials)  
 [Usage](#usage)  
 [Compatibility](#compatibility)  
+[Example Workflows](#example-workflows)  
 [Resources](#resources)  
 
 ## Installation
@@ -53,7 +54,17 @@ Every operation has a **Debug Mode** toggle. Enable it to return the request pay
 
 Requires n8n version 1.x and Node.js 18 or newer.
 
+## Example Workflows
+
+Import these into n8n to try each resource out (**Workflows > Import from File**):
+
+* [Document Generation](docs/example/Example%20Cloud%20Office%20Print%20-%20document%20generation.json)
+* [PDF Operations](docs/example/Example%20Cloud%20Office%20Print%20-%20PDF%20Opreation.json)
+* [Password Protect Document](docs/example/Example%20for%20Password%20protect.json)
+* [PDF Compare](docs/example/Example%20for%20Compare%20PDF.json)
+
 ## Resources
 
+* [Full user guide](docs/README.md) – step-by-step setup with screenshots
 * [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
 * [Cloud Office Print documentation](https://www.apexofficeprint.com/docs/)

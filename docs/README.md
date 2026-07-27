@@ -2,6 +2,7 @@
 
 Generate and process documents inside n8n: feel the power of Cloud Office Print without leaving your workflow.
 
+Prefer to jump straight in? Import a ready-made workflow from the [`example`](example/) folder for each resource.
 
 ## Contents
 
@@ -30,7 +31,7 @@ You need:
 
 ## 1. Install the node
 
-Intall the node with npm:
+Install the node with npm:
 
 ```bash
 npm install n8n-nodes-cloudofficeprint
@@ -97,6 +98,8 @@ Every field has a short help text. Hover the **?** next to a field's label to re
 
 Fills the tags in a template with your JSON data and exports the result.
 
+![Document Generation fields](images/06-document-generation.png)
+
 | Field | What to enter |
 | --- | --- |
 | **File** | The template. One file. Allowed: `docx`, `docm`, `xlsx`, `xlsm`, `pptx`, `pptm`, `html`, `md`, `txt`, `csv`, `pdf`, `ics`, `ifb`, `xml`. |
@@ -138,14 +141,16 @@ The node returns a PDF that reads *Dear John Doe, your invoice total is $250.00.
 
 **PDF Watermark** writes text diagonally across every page.
 
+![PDF Watermark fields](images/07-watermark.png)
+
 | Field | What to enter |
 | --- | --- |
-| **File** | One or more files. |
+| **File** | One PDF. |
 | **Watermark Text** | The text to stamp. |
 | **Watermark Color** | Color of the text. |
-| **Watermark Font** | Font name.|
-| **Watermark Opacity in %** | `0` to `100`.|
-| **Watermark Size** | Text size in px, `1` to `1000`.|
+| **Watermark Font** | Font name. |
+| **Watermark Opacity in %** | `0` to `100`. |
+| **Watermark Size** | Text size in px, `1` to `1000`. |
 
 **Example**
 
