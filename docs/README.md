@@ -43,7 +43,7 @@ npm install n8n-nodes-cloudofficeprint
 2. Fill in the fields.
 3. Click **Save**. n8n tests the connection and shows a green check when it works.
 
-![Cloud Office Print API credential](images/01-credential.png)
+![Cloud Office Print API credential](images/01-credential.webp)
 
 | Field | What to enter |
 | --- | --- |
@@ -56,11 +56,11 @@ npm install n8n-nodes-cloudofficeprint
 1. On the canvas, click **+** to add a node.
 2. Search **Cloud Office Print** and select it.
 
-   ![Search for the node](images/02-add-node.png)
+   ![Search for the node](images/02-add-node.webp)
 
 3. Pick an action you want to use.
 
-   ![The available actions](images/03-actions.png)
+   ![The available actions](images/03-actions.webp)
 
 Each action maps to a **Resource** and an **Operation**:
 
@@ -75,7 +75,7 @@ Each action maps to a **Resource** and an **Operation**:
 
 Every action takes files the same way. In the **File** section, click **Add File** and fill in:
 
-![File Configuration](images/04-file-input.png)
+![File Configuration](images/04-file-input.webp)
 
 | Field | What to enter |
 | --- | --- |
@@ -92,13 +92,13 @@ Notes:
 
 Every field has a short help text. Hover the **?** next to a field's label to read it for more information.
 
-![Field help text](images/05-help-text.png)
+![Field help text](images/05-help-text.webp)
 
 ### Document Generation
 
 Fills the tags in a template with your JSON data and exports the result.
 
-![Document Generation fields](images/06-document-generation.png)
+![Document Generation fields](images/06-document-generation.webp)
 
 | Field | What to enter |
 | --- | --- |
@@ -111,7 +111,7 @@ Fills the tags in a template with your JSON data and exports the result.
 
 Fill a `.docx` template containing `Dear {customer}, your invoice total is {total}.` and export it as a PDF:
 
-![Document Generation example](images/11-doc-gen-example.png)
+![Document Generation example](images/11-doc-gen-example.webp)
 
 - **Template**: the `.docx` as Base64, with **File Type** `docx`.
 - **Data (JSON)**: `{ "customer": "John Doe", "total": "$250.00" }`, keys matching the tag names.
@@ -141,7 +141,7 @@ The node returns a PDF that reads *Dear John Doe, your invoice total is $250.00.
 
 **PDF Watermark** writes text diagonally across every page.
 
-![PDF Watermark fields](images/07-watermark.png)
+![PDF Watermark fields](images/07-watermark.webp)
 
 | Field | What to enter |
 | --- | --- |
@@ -156,7 +156,7 @@ The node returns a PDF that reads *Dear John Doe, your invoice total is $250.00.
 
 Stamp every page of a PDF with a diagonal grey watermark:
 
-![PDF Watermark example](images/12-watermark-example.png)
+![PDF Watermark example](images/12-watermark-example.webp)
 
 - **File**: the PDF as Base64, with **File Type** `pdf`.
 - **Watermark Text**: `all rights reserved`.
@@ -194,17 +194,17 @@ Compares two PDFs and returns a PDF showing the differences.
 
 The action returns the result as Base64. To save or download it, add a **Convert to File** node after it and set the operation to **Move Base64 String to File**.
 
-![Convert the Base64 result to a file](images/08-result-to-file.png)
+![Convert the Base64 result to a file](images/08-result-to-file.webp)
 
 ## 7. Debug Mode
 
 Every action has a **Debug Mode** toggle at the bottom.
 
-![Debug Mode toggle](images/09-debug-toggle.png)
+![Debug Mode toggle](images/09-debug-toggle.webp)
 
 Turn it **on** to return the request payload the node would send, without calling Cloud Office Print. Use it to check your input, or attach the payload when you contact support.
 Turn it **off** to run the action for real.
 
-![Debug Mode output](images/10-debug-output.png)
+![Debug Mode output](images/10-debug-output.webp)
 
 ## For more information visit the [official documentation](https://www.apexofficeprint.com/docs/).
