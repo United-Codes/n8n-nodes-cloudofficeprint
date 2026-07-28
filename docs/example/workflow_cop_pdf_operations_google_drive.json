@@ -124,7 +124,7 @@
           }
         }
       },
-      "type": "CUSTOM.cloudOfficePrint",
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
       "typeVersion": 1,
       "position": [
         840,
@@ -165,7 +165,7 @@
         "watermark_opacity": 50,
         "watermark_size": 45
       },
-      "type": "CUSTOM.cloudOfficePrint",
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
       "typeVersion": 1,
       "position": [
         1120,
@@ -201,7 +201,7 @@
           }
         }
       },
-      "type": "CUSTOM.cloudOfficePrint",
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
       "typeVersion": 1,
       "position": [
         1400,
@@ -502,7 +502,7 @@
           ]
         }
       },
-      "type": "CUSTOM.cloudOfficePrint",
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
       "typeVersion": 1,
       "position": [
         1400,

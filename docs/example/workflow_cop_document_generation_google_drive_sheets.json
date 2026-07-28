@@ -195,7 +195,7 @@
         "outputFileName": "={{ $json.fileName }}",
         "outputType": "pdf"
       },
-      "type": "CUSTOM.cloudOfficePrint",
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
       "typeVersion": 1,
       "position": [
         1400,
