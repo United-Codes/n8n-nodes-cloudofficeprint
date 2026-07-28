@@ -41,13 +41,13 @@ npm install n8n-nodes-cloudofficeprint
 
 1. Add a credential and pick **Cloud Office Print API**.
 2. Fill in the fields.
-3. Click **Save**. n8n tests the connection and shows a green check when it works.
+3. Click **Save**. n8n checks that the API Base URL is reachable and shows a green check. The key itself is only checked on the first real request, so a green check does not mean the key is valid.
 
 ![Cloud Office Print API credential](images/01-credential.webp)
 
 | Field | What to enter |
 | --- | --- |
-| **API Key** | Your Cloud Office Print API key. |
+| **API Key** | Your Cloud Office Print API key. Required for the Cloud Office Print and APEX Office Print API URLs. Optional on an on-premise APEX Office Print server that does not require a key. |
 | **API Base URL** | The API endpoint. |
 | **Mode** | `Production` or  `Development` mode. |
 
