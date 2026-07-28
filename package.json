@@ -33,6 +33,14 @@
 	"files": [
 		"dist"
 	],
+	"auto-changelog": {
+		"output": "CHANGELOG.generated.md"
+	},
+	"release-it": {
+		"github": {
+			"releaseNotes": "node scripts/release-notes.mjs ${version}"
+		}
+	},
 	"n8n": {
 		"n8nNodesApiVersion": 1,
 		"strict": true,
