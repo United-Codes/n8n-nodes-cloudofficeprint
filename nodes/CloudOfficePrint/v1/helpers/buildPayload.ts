@@ -50,7 +50,6 @@ export async function buildCopPayload(this: IExecuteFunctions, i: number, apiKey
         output_type: outputValues.output_type as string,
     });
 
-    // Files
     const files = (filesFC ?? []).map((f) => {
         const values = (f.values ?? ({} as AnyObj)) as {
             filename?: string;
@@ -65,7 +64,6 @@ export async function buildCopPayload(this: IExecuteFunctions, i: number, apiKey
         };
     });
 
-    // Operation-specific options (PDF etc.)
     const resource = this.getNodeParameter('resource', i) as string;
     const operation = this.getNodeParameter('operation', i) as string;
 
@@ -79,7 +77,6 @@ export async function buildCopPayload(this: IExecuteFunctions, i: number, apiKey
         template,
         output,
         files,
-        // optionally include "operation" / "resource" if your API route expects them
         resource,
         operation,
     };

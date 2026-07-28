@@ -63,7 +63,6 @@ export async function execute(this: IExecuteFunctions, index: number) {
             output_read_password: readPassword,
         }
     };
-    // const responseData = body
     const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
     const executionData = this.helpers.constructExecutionMetaData(

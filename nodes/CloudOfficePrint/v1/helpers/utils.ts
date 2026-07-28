@@ -6,11 +6,7 @@ import type {
 	IPollFunctions,
 	JsonObject,
 } from 'n8n-workflow';
-import {
-	// ApplicationError,
-	jsonParse,
-	NodeApiError
-} from 'n8n-workflow';
+import { jsonParse, NodeApiError } from 'n8n-workflow';
 
 export function prepareApiError(
 	this: IExecuteFunctions | IExecuteSingleFunctions | ILoadOptionsFunctions | IPollFunctions,

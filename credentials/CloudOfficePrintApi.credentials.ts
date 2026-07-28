@@ -43,8 +43,7 @@ export class CloudOfficePrintApi implements ICredentialType {
             description: 'In development mode, requests are marked with mode: development',
         }
     ];
-    // no authenticate block: the api key is sent in the request body by the node.
-    // the test only checks the base url is reachable; the key is validated on the first real request.
+    // no authenticate block: the node sends the api key in the request body, so this only checks the base url is reachable
     test: ICredentialTestRequest = {
         request: {
             baseURL: '={{$credentials.apiBaseUrl}}',

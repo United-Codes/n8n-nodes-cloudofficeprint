@@ -127,10 +127,7 @@ function extensionToMime(extension: string): string {
     return mime;
 }
 
-/**
- * Converts fileConfig parameters into AOP payload objects:
- * a single object becomes a Template, an array becomes base64 File entries.
- */
+/** A single fileConfig becomes a Template, an array becomes base64 File entries. */
 export function getFilesData(
     fileNodeParameters: FileNodeParameters[] | FileNodeParameters,
     ref: 'compare' | 'template' = 'template',
