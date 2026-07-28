@@ -57,6 +57,7 @@ export async function router(this: IExecuteFunctions) {
                 }
                 error.context.itemIndex = i;
             }
+            // eslint-disable-next-line @n8n/community-nodes/require-node-api-error -- re-wrapping would drop the HTTP context set by the transport layer
             throw error;
         }
     }

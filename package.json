@@ -23,7 +23,6 @@
 	"scripts": {
 		"build": "n8n-node build",
 		"build:watch": "tsc --watch",
-		"prepare": "npm run build",
 		"dev": "n8n-node dev",
 		"lint": "n8n-node lint",
 		"lint:fix": "n8n-node lint --fix",
@@ -45,7 +44,7 @@
 		]
 	},
 	"devDependencies": {
-		"@n8n/node-cli": "*",
+		"@n8n/node-cli": "^0.41.2",
 		"@types/node": "^25.0.9",
 		"eslint": "9.32.0",
 		"prettier": "3.6.2",

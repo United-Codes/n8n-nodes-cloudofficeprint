@@ -1,5 +1,4 @@
 // vitest is a devDependency; tests are not shipped
-// eslint-disable-next-line @n8n/community-nodes/no-restricted-imports
 import { describe, expect, it } from 'vitest';
 import type { INodeProperties, INodePropertyCollection } from 'n8n-workflow';
 import { getFileDesc, getFilesData } from '../nodes/CloudOfficePrint/v1/utils/file_utils';
