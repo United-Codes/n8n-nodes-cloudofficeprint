@@ -54,9 +54,7 @@ export async function APEXOfficePrintRequest(
             'Content-Type': 'application/json',
             ...headers,
         },
-
-        // 🔑 IMPORTANT FOR BASE64 / BINARY
-        // @ts-expect-error asd
+        // @ts-expect-error not in the type, but keeps the base64 response body unparsed
         encoding: null,
         returnFullResponse: true,
     };

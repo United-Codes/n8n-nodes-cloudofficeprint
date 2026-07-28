@@ -8,7 +8,7 @@ import {
 export class CloudOfficePrintApi implements ICredentialType {
     name = 'copApi';
     displayName = 'Cloud Office Print API';
-    documentationUrl = 'https://www.apexofficeprint.com/docs/';
+    documentationUrl = 'https://www.cloudofficeprint.com/docs/n8n.html';
     icon: Icon = {
         light: 'file:../nodes/CloudOfficePrint/v1/cop.svg',
         dark: 'file:../nodes/CloudOfficePrint/v1/cop.dark.svg',
@@ -20,7 +20,8 @@ export class CloudOfficePrintApi implements ICredentialType {
             type: 'string',
             default: '',
             typeOptions: { password: true },
-            description: 'API key from your Cloud Office Print account',
+            description: 'API key from your Cloud Office Print account. Required for the Cloud Office Print and APEX Office Print API URLs, optional for an on-premise APEX Office Print server.',
+            hint: 'Leave empty only when using an on-premise server that does not require a key',
         },
         {
             displayName: 'API Base URL',
@@ -42,7 +43,8 @@ export class CloudOfficePrintApi implements ICredentialType {
             description: 'In development mode, requests are marked with mode: development',
         }
     ];
-    // no authenticate block: the api key is sent in the request body by the node
+    // no authenticate block: the api key is sent in the request body by the node.
+    // the test only checks the base url is reachable; the key is validated on the first real request.
     test: ICredentialTestRequest = {
         request: {
             baseURL: '={{$credentials.apiBaseUrl}}',
