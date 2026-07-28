@@ -7,4 +7,4 @@ type NodeMap = {
     pdfCompare: 'pdfCompare';
 };
 
-export type APEXOfficePrint = AllEntities<NodeMap>;
+export type CloudOfficePrint = AllEntities<NodeMap>;

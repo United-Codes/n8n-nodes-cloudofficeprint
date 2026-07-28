@@ -23,7 +23,7 @@ import {
  * @returns The response
  * @throws {NodeApiError} If the request fails
  */
-export async function APEXOfficePrintRequest(
+export async function CloudOfficePrintRequest(
     this: IExecuteFunctions | IExecuteSingleFunctions | ILoadOptionsFunctions | IPollFunctions,
     method: IHttpRequestMethods,
     resource: string,

@@ -207,4 +207,4 @@ Turn it **off** to run the action for real.
 
 ![Debug Mode output](images/10-debug-output.webp)
 
-## For more information visit the [official documentation](https://www.apexofficeprint.com/docs/).
+## For more information visit the [official documentation](https://www.cloudofficeprint.com/docs/n8n.html).

@@ -1,7 +1,7 @@
 import type { IDataObject, IExecuteFunctions } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
-import { APEXOfficePrintRequest } from '../../transport';
+import { CloudOfficePrintRequest } from '../../transport';
 import { getFilesData, type FileNodeParameters } from '../../utils/file_utils';
 
 /** Shared executor for single-file to PDF operations. */
@@ -32,7 +32,7 @@ export async function runFileToPdf(
         },
     };
 
-    const responseData = await APEXOfficePrintRequest.call(ctx, 'POST', '', body);
+    const responseData = await CloudOfficePrintRequest.call(ctx, 'POST', '', body);
 
     return ctx.helpers.constructExecutionMetaData(
         ctx.helpers.returnJsonArray(responseData as IDataObject),

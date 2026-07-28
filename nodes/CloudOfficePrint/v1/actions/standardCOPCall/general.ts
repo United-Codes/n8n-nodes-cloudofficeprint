@@ -11,7 +11,7 @@ import {
     NodeOperationError,
 } from 'n8n-workflow';
 
-import { APEXOfficePrintRequest } from '../../transport';
+import { CloudOfficePrintRequest } from '../../transport';
 import { outputTypeDesc } from '../../descriptions/common.description';
 
 export const properties: INodeProperties[] = [
@@ -66,7 +66,7 @@ export async function execute(this: IExecuteFunctions, index: number) {
             output_encoding: 'base64',
         }
     };
-    const responseData = await APEXOfficePrintRequest.call(this, 'POST', '', body);
+    const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
     const executionData = this.helpers.constructExecutionMetaData(
         this.helpers.returnJsonArray(responseData as IDataObject),

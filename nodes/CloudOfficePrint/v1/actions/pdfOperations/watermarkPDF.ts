@@ -9,7 +9,7 @@ import {
     NodeOperationError,
 } from 'n8n-workflow';
 
-import { APEXOfficePrintRequest } from '../../transport';
+import { CloudOfficePrintRequest } from '../../transport';
 import { getFileDesc, getFilesData, appendPrependFileSupportedType, type FileNodeParameters } from '../../utils/file_utils';
 
 export const properties: INodeProperties[] = [
@@ -106,7 +106,7 @@ export async function execute(this: IExecuteFunctions, index: number) {
         }
     };
 
-    const responseData = await APEXOfficePrintRequest.call(this, 'POST', '', body);
+    const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
     const executionData = this.helpers.constructExecutionMetaData(
 
