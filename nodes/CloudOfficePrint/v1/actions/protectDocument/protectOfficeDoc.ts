@@ -4,29 +4,30 @@ import type {
     INodeProperties,
 } from 'n8n-workflow';
 
-import { getFileDesc, getFilesData } from '../../utils/file_utils';
-import type { Template } from '../../utils/file_utils';
+import { getFileDesc, getFilesData, type FileNodeParameters, Template  } from '../../utils/file_utils';
+
 
 import {
     updateDisplayOptions,
     NodeOperationError,
-    // LoggerProxy as Logger
 } from 'n8n-workflow';
 
-import { APEXOfficePrintRequest } from '../../transport';
+import { CloudOfficePrintRequest } from '../../transport';
 
 
 export const properties: INodeProperties[] = [
     getFileDesc(
         'file',
         'File',
-        'File to process',
+        'Office document to protect',
         false,
-        true),
+        true,
+        ['docx', 'xlsx', 'pptx'],
+    ),
     {
         displayName: 'Password',
         name: 'read_password',
-        description: 'Password to read the Office Document',
+        description: 'Password required to open the document',
         // eslint-disable-next-line n8n-nodes-base/node-param-type-options-password-missing
         type: 'string',
         default: '',
@@ -43,8 +44,8 @@ const displayOptions = {
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
     const readPassword = this.getNodeParameter('read_password', index) as string;
-    const files = this.getNodeParameter('file.fileConfig', index) as { fileSource: string; fileData: string; filename: string; mimeType: string; }[];
-    if (!files || files.length === 0) {
+    const files = this.getNodeParameter('file.fileConfig', index, null) as FileNodeParameters | null;
+    if (!files) {
         throw new NodeOperationError(this.getNode(), 'No file configuration found. Please add a file to the input.');
     }
     const template = getFilesData(files);
@@ -62,8 +63,7 @@ export async function execute(this: IExecuteFunctions, index: number) {
             output_read_password: readPassword,
         }
     };
-    // const responseData = body
-    const responseData = await APEXOfficePrintRequest.call(this, 'POST', '', body);
+    const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
     const executionData = this.helpers.constructExecutionMetaData(
         this.helpers.returnJsonArray(responseData as IDataObject),

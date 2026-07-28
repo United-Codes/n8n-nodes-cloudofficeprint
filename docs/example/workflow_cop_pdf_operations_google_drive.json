@@ -1,0 +1,774 @@
+{
+  "name": "Cloud Office Print - PDF Operations with Google Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Convert, watermark and compress\n\n**Before running:** set your credential on every Cloud Office Print, Google Drive and Google Sheets node, one by one. n8n does not copy credentials across imported nodes. Then pick your own files in the empty File and Document fields.\n\nTakes a Word file from Drive, converts it to PDF, stamps CONFIDENTIAL on every page, compresses it and uploads the result.\n\nThe Cloud Office Print node returns Base64 in `body`, so one node feeds the next with `{{ $json.body }}`. Convert to File is only needed once, at the end.\n\n### Setup\nUpload `docs/assets/samples/sample-document.docx` to your Drive, then select it below.\n\nThis workflow has **four** Cloud Office Print nodes across its two flows. Each one needs its credential set separately: Convert to PDF, Add CONFIDENTIAL watermark, Compress PDF, and Merge files into one PDF further down the canvas.",
+        "height": 486,
+        "width": 2220,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        0
+      ],
+      "id": "3f4e14c3-c751-4415-803f-283219257a19",
+      "name": "Sticky Note - Pipeline overview"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        981
+      ],
+      "id": "8b6bcdbf-d821-4071-81fe-cb39125ee64e",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "content": "## Trigger\n\nRuns on demand.\n\nA Google Drive Trigger watching a folder is a good replacement: every document dropped in gets processed.",
+        "height": 425,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        516
+      ],
+      "id": "ebb99bd6-f02f-492e-8d0a-a163f469c09a",
+      "name": "Sticky Note - When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        280,
+        981
+      ],
+      "id": "ec2d5607-16da-4fc0-8f15-8fd8a0870194",
+      "name": "Download Word document from Drive"
+    },
+    {
+      "parameters": {
+        "content": "## Get the file\n\nGoogle Drive, operation Download File.\n\n**Pick the file.** The File field is empty on import. Click it and choose `sample-document.docx` from your Drive.",
+        "height": 425,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        516
+      ],
+      "id": "887717cc-cd8a-457a-872f-87cf31d77d84",
+      "name": "Sticky Note - Download Word document from Drive"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "data",
+        "destinationKey": "documentBase64",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        981
+      ],
+      "id": "9eaf03aa-bd7b-4529-82ea-09b7b90bc53c",
+      "name": "Document as Base64"
+    },
+    {
+      "parameters": {
+        "content": "## Binary to Base64\n\nExtract from File, operation Move File to Base64 String.\n\nDestination Output Field: `documentBase64`",
+        "height": 425,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        540,
+        516
+      ],
+      "id": "3d321c58-19b6-46f4-8f73-932ee6e318c2",
+      "name": "Sticky Note - Document as Base64"
+    },
+    {
+      "parameters": {
+        "resource": "pdfOperations",
+        "operation": "convertFileToPDF",
+        "template": {
+          "fileConfig": {
+            "fileData": "={{ $json.documentBase64 }}",
+            "mimeType": "docx"
+          }
+        }
+      },
+      "type": "CUSTOM.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        840,
+        981
+      ],
+      "id": "16939676-016f-473c-8106-8448f1dc0b82",
+      "name": "Convert to PDF"
+    },
+    {
+      "parameters": {
+        "content": "## Convert to PDF\n\nResource PDF Operation, operation Convert to PDF.\n\nBase64 Encoded File: `{{ $json.documentBase64 }}`\nFile Type: `docx`, must match the real file.\n\nReturns the PDF as Base64 in `body`.",
+        "height": 425,
+        "width": 260,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        820,
+        516
+      ],
+      "id": "ab3f1b20-be7a-4deb-86a4-350a1a768b45",
+      "name": "Sticky Note - Convert to PDF"
+    },
+    {
+      "parameters": {
+        "resource": "pdfOperations",
+        "operation": "watermarkPDF",
+        "file": {
+          "fileConfig": {
+            "fileData": "={{ $json.body }}",
+            "mimeType": "pdf"
+          }
+        },
+        "watermark_text": "CONFIDENTIAL",
+        "watermark_color": "#D3D3D3",
+        "watermark_font": "Arial",
+        "watermark_opacity": 50,
+        "watermark_size": 45
+      },
+      "type": "CUSTOM.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        981
+      ],
+      "id": "1b73fe39-8da5-429a-8bd6-69f953517b0f",
+      "name": "Add CONFIDENTIAL watermark"
+    },
+    {
+      "parameters": {
+        "content": "## Watermark\n\nOperation PDF Watermark.\n\nBase64 Encoded File: `{{ $json.body }}`, taken straight from the previous Cloud Office Print node.\n\nText CONFIDENTIAL, colour `#D3D3D3`, opacity 50, size 45.\n\nThe text is stamped diagonally on every page.",
+        "height": 425,
+        "width": 260,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        516
+      ],
+      "id": "907f0ef0-dacb-47b5-8700-1ffad642c815",
+      "name": "Sticky Note - Add CONFIDENTIAL watermark"
+    },
+    {
+      "parameters": {
+        "resource": "pdfOperations",
+        "operation": "compressPDF",
+        "template": {
+          "fileConfig": {
+            "fileData": "={{ $json.body }}",
+            "mimeType": "pdf"
+          }
+        }
+      },
+      "type": "CUSTOM.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        981
+      ],
+      "id": "5f1c83cd-5323-4743-84d7-f52df035728a",
+      "name": "Compress PDF"
+    },
+    {
+      "parameters": {
+        "content": "## Compress\n\nOperation Compress PDF.\n\nBase64 Encoded File: `{{ $json.body }}`, again from the previous node.\n\nUseful before mailing or archiving, where size limits apply.",
+        "height": 425,
+        "width": 260,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        516
+      ],
+      "id": "18fa0a83-1c8b-49a1-8142-d7cfb8cae96a",
+      "name": "Sticky Note - Compress PDF"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "body",
+        "binaryPropertyName": "data",
+        "options": {
+          "fileName": "sample-document-confidential.pdf",
+          "mimeType": "application/pdf"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1680,
+        981
+      ],
+      "id": "58c41ff5-85cd-45ac-8966-520f5a708bb0",
+      "name": "Base64 result to PDF file"
+    },
+    {
+      "parameters": {
+        "content": "## Base64 to file\n\nConvert to File, operation Move Base64 String to File.\n\nBase64 Input Field: `body`\n\nOnly needed once, at the end of the chain.",
+        "height": 425,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1660,
+        516
+      ],
+      "id": "06240a95-32f3-462e-827f-4b4976634e0e",
+      "name": "Sticky Note - Base64 result to PDF file"
+    },
+    {
+      "parameters": {
+        "name": "sample-document-confidential.pdf",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1960,
+        981
+      ],
+      "id": "bab9a0a5-deed-4156-8219-41d516608b2a",
+      "name": "Upload processed PDF to Drive"
+    },
+    {
+      "parameters": {
+        "content": "## Save the result\n\nGoogle Drive, operation Upload File.\n\nGoes to the Drive root by default. Pick any folder.",
+        "height": 425,
+        "width": 260,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        516
+      ],
+      "id": "bf613674-6dca-4b04-867f-a0341edece9c",
+      "name": "Sticky Note - Upload processed PDF to Drive"
+    },
+    {
+      "parameters": {
+        "content": "## Merge files into one PDF\n\n**Before running:** set your credential on every Cloud Office Print, Google Drive and Google Sheets node, one by one. n8n does not copy credentials across imported nodes. Then pick your own files in the empty File and Document fields.\n\nDownloads two files from Drive, merges them into a single PDF in order, and uploads the result.\n\nThe Files field is a fixed list, so each file needs its own entry and its own Base64 value. That is why there are two download and Base64 pairs. Office files and images are converted to PDF before being appended.\n\n### Setup\nUpload `docs/assets/samples/invoice-2024-001.pdf` and `sample-document.docx` to your Drive.",
+        "height": 433,
+        "width": 2220,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        1217
+      ],
+      "id": "cf4a115d-c180-4e78-82f6-2cafe89538ab",
+      "name": "Sticky Note - Merge overview"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        2208
+      ],
+      "id": "a75a4e1e-1876-424b-812b-d6321ee7e41c",
+      "name": "When clicking 'Execute workflow' - merge"
+    },
+    {
+      "parameters": {
+        "content": "## Trigger\n\nA second, separate trigger.\n\nSelect this node and click Execute workflow to run only the merge flow.",
+        "height": 488,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        1680
+      ],
+      "id": "6eb4eadc-2c18-436b-8d79-c38461a50fe9",
+      "name": "Sticky Note - When clicking 'Execute workflow' - merge"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        280,
+        2208
+      ],
+      "id": "9084a5b5-fb8b-4dc7-8438-1c7d21515356",
+      "name": "Download first file (PDF)"
+    },
+    {
+      "parameters": {
+        "content": "## First file\n\nGoogle Drive, operation Download File.\n\n**Pick the file.** The File field is empty on import. Click it and choose `invoice-2024-001.pdf` from your Drive.\n\nThis one goes first in the merged PDF.",
+        "height": 488,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        1680
+      ],
+      "id": "c21e2fe3-1f22-45b5-8ece-4f1f2470f627",
+      "name": "Sticky Note - Download first file (PDF)"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "data",
+        "destinationKey": "firstFile",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        2208
+      ],
+      "id": "8484987a-5b2c-482d-8989-8373eee9a07f",
+      "name": "First file as Base64"
+    },
+    {
+      "parameters": {
+        "content": "## Binary to Base64\n\nDestination Output Field: `firstFile`\n\nThe next Drive node replaces `$json`, so the merge node reads this value back by node name.",
+        "height": 488,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        540,
+        1680
+      ],
+      "id": "2d9bbdff-a870-4017-8f0f-762487df9ec8",
+      "name": "Sticky Note - First file as Base64"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        840,
+        2208
+      ],
+      "id": "b12269ff-a2ed-48b9-8fe3-0dad906eb5c2",
+      "name": "Download second file (DOCX)"
+    },
+    {
+      "parameters": {
+        "content": "## Second file\n\nGoogle Drive, operation Download File.\n\n**Pick the file.** The File field is empty on import. Click it and choose `sample-document.docx` from your Drive.",
+        "height": 488,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        820,
+        1680
+      ],
+      "id": "f359c500-3ed9-46d1-8239-04d15ecbb4cb",
+      "name": "Sticky Note - Download second file (DOCX)"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "data",
+        "destinationKey": "secondFile",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        2208
+      ],
+      "id": "2b5bd89b-a2e3-4119-8aca-0072a890ca62",
+      "name": "Second file as Base64"
+    },
+    {
+      "parameters": {
+        "content": "## Binary to Base64\n\nDestination Output Field: `secondFile`",
+        "height": 488,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        1680
+      ],
+      "id": "7043a191-6dff-4a99-8ada-a3355f464a5d",
+      "name": "Sticky Note - Second file as Base64"
+    },
+    {
+      "parameters": {
+        "resource": "pdfOperations",
+        "operation": "mergeToPDF",
+        "file": {
+          "fileConfig": [
+            {
+              "fileData": "={{ $('First file as Base64').first().json.firstFile }}",
+              "mimeType": "pdf"
+            },
+            {
+              "fileData": "={{ $json.secondFile }}",
+              "mimeType": "docx"
+            }
+          ]
+        }
+      },
+      "type": "CUSTOM.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        2208
+      ],
+      "id": "7f2c7761-de1e-4f90-8fa5-491b52ef3fcc",
+      "name": "Merge files into one PDF"
+    },
+    {
+      "parameters": {
+        "content": "## Merge\n\nOperation Merge to Single PDF File.\n\nTwo entries under Files, merged top to bottom:\n1. `{{ $('First file as Base64').first().json.firstFile }}`, type `pdf`\n2. `{{ $json.secondFile }}`, type `docx`\n\nClick Add File for more. Each entry needs its own Base64 value and file type.",
+        "height": 488,
+        "width": 260,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        1680
+      ],
+      "id": "b995d8e1-26aa-4741-861f-e1037cf284ee",
+      "name": "Sticky Note - Merge files into one PDF"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "body",
+        "binaryPropertyName": "data",
+        "options": {
+          "fileName": "merged-documents.pdf",
+          "mimeType": "application/pdf"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1680,
+        2208
+      ],
+      "id": "f1e3c8a6-4077-45fc-8886-6d2dc5595b1b",
+      "name": "Merged Base64 to PDF file"
+    },
+    {
+      "parameters": {
+        "content": "## Base64 to file\n\nConvert to File, operation Move Base64 String to File.\n\nBase64 Input Field: `body`",
+        "height": 488,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1660,
+        1680
+      ],
+      "id": "872af95e-bc39-4beb-8b53-339363a0a5c7",
+      "name": "Sticky Note - Merged Base64 to PDF file"
+    },
+    {
+      "parameters": {
+        "name": "merged-documents.pdf",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1960,
+        2208
+      ],
+      "id": "5f038505-adfe-476c-803b-a2469d643be1",
+      "name": "Upload merged PDF to Drive"
+    },
+    {
+      "parameters": {
+        "content": "## Save the result\n\nGoogle Drive, operation Upload File.\n\nThe combined PDF lands in your Drive.",
+        "height": 488,
+        "width": 260,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        1680
+      ],
+      "id": "c0a89bc5-6158-42dc-8ef4-fc6a2eded432",
+      "name": "Sticky Note - Upload merged PDF to Drive"
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Download Word document from Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Word document from Drive": {
+      "main": [
+        [
+          {
+            "node": "Document as Base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document as Base64": {
+      "main": [
+        [
+          {
+            "node": "Convert to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to PDF": {
+      "main": [
+        [
+          {
+            "node": "Add CONFIDENTIAL watermark",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add CONFIDENTIAL watermark": {
+      "main": [
+        [
+          {
+            "node": "Compress PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compress PDF": {
+      "main": [
+        [
+          {
+            "node": "Base64 result to PDF file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Base64 result to PDF file": {
+      "main": [
+        [
+          {
+            "node": "Upload processed PDF to Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking 'Execute workflow' - merge": {
+      "main": [
+        [
+          {
+            "node": "Download first file (PDF)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download first file (PDF)": {
+      "main": [
+        [
+          {
+            "node": "First file as Base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "First file as Base64": {
+      "main": [
+        [
+          {
+            "node": "Download second file (DOCX)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download second file (DOCX)": {
+      "main": [
+        [
+          {
+            "node": "Second file as Base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Second file as Base64": {
+      "main": [
+        [
+          {
+            "node": "Merge files into one PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge files into one PDF": {
+      "main": [
+        [
+          {
+            "node": "Merged Base64 to PDF file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merged Base64 to PDF file": {
+      "main": [
+        [
+          {
+            "node": "Upload merged PDF to Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

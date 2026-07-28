@@ -1,0 +1,390 @@
+{
+  "name": "Cloud Office Print - Document Generation from Google Drive + Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Document generation: template from Drive, data from Sheets\n\n**Before running:** set your credential on every Cloud Office Print, Google Drive and Google Sheets node, one by one. n8n does not copy credentials across imported nodes. Then pick your own files in the empty File and Document fields.\n\nFills a Word invoice template with order lines from a spreadsheet and saves one PDF per customer back to Drive.\n\n### Setup\n1. Upload `docs/assets/templates/invoice-template.docx` to your Drive.\n2. Import `docs/assets/data/order-lines.csv` into a Google Sheet, tab name `Order Lines`.\n3. Select your credentials in the Cloud Office Print, Google Drive and Google Sheets nodes.\n4. Select your copies of the file and the sheet.",
+        "height": 479,
+        "width": 2220,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        0
+      ],
+      "id": "aade3610-2a70-489d-88e8-4efaab6bf35b",
+      "name": "Sticky Note - Overview"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1135
+      ],
+      "id": "09c24aee-d025-4553-8ce7-4787669debb5",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "content": "## Trigger\n\nRuns on demand.\n\nFor nightly invoicing use a Schedule Trigger instead, or a Google Sheets Trigger to run when a row is added.",
+        "height": 586,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        509
+      ],
+      "id": "0cc7ea9b-7e38-44e3-84b2-2b8933ca60dd",
+      "name": "Sticky Note - When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        280,
+        1135
+      ],
+      "id": "e4339a04-5aff-4e9d-867b-a66eb57d5521",
+      "name": "Download DOCX template from Drive"
+    },
+    {
+      "parameters": {
+        "content": "## Get the template\n\nGoogle Drive, operation Download File.\n\n**Pick the file.** The File field is empty on import. Click it and choose `invoice-template.docx` from your Drive.\n\nThe file comes out as binary in the `data` field. Cloud Office Print needs Base64, so the next node converts it.",
+        "height": 586,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        509
+      ],
+      "id": "dc000f90-ceea-4f24-84f0-585c9735ea55",
+      "name": "Sticky Note - Download DOCX template from Drive"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "data",
+        "destinationKey": "templateBase64",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        1135
+      ],
+      "id": "2a75f98c-9826-43d2-800a-15b8361cefde",
+      "name": "Template file as Base64"
+    },
+    {
+      "parameters": {
+        "content": "## Binary to Base64\n\nExtract from File, operation Move File to Base64 String.\n\nInput Binary Field: `data`\nDestination Output Field: `templateBase64`\n\nUse this node whenever a file has to reach Cloud Office Print, whatever the source.",
+        "height": 586,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        540,
+        509
+      ],
+      "id": "61c6172e-d02e-46ab-8014-76f735a5dc93",
+      "name": "Sticky Note - Template file as Base64"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Order Lines",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        840,
+        1135
+      ],
+      "id": "d21dd132-941f-4297-8d9f-9235205975df",
+      "name": "Get order lines from Google Sheets"
+    },
+    {
+      "parameters": {
+        "content": "## Get the data\n\nGoogle Sheets, operation Get Row(s) in Sheet.\n\n**Pick the spreadsheet.** The Document field is empty on import. Click it and choose your orders spreadsheet. Leave Sheet on `Order Lines`.\n\nColumns: `cust_first_name`, `cust_last_name`, `cust_city`, `order_name`, `product_name`, `quantity`, `unit_price`.\n\nNine rows in the sample sheet, so nine items come out of this node.",
+        "height": 586,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        820,
+        509
+      ],
+      "id": "430916e0-9ec5-4bed-81f2-d79073803791",
+      "name": "Sticky Note - Get order lines from Google Sheets"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Google Sheets gives flat rows. The template expects nested JSON:\n//   { cust_first_name, cust_last_name, cust_city, orders: [ { order_name, order_total, product: [...] } ] }\n// Group the rows by customer, then by order.\n\nconst customers = new Map();\n\nfor (const row of $input.all().map((item) => item.json)) {\n\tconst key = `${row.cust_first_name} ${row.cust_last_name}`;\n\n\tif (!customers.has(key)) {\n\t\tcustomers.set(key, {\n\t\t\tcust_first_name: row.cust_first_name,\n\t\t\tcust_last_name: row.cust_last_name,\n\t\t\tcust_city: row.cust_city,\n\t\t\torders: [],\n\t\t});\n\t}\n\n\tconst customer = customers.get(key);\n\tlet order = customer.orders.find((o) => o.order_name === row.order_name);\n\n\tif (!order) {\n\t\torder = { order_name: row.order_name, order_total: 0, product: [] };\n\t\tcustomer.orders.push(order);\n\t}\n\n\tconst quantity = Number(row.quantity);\n\tconst unitPrice = Number(row.unit_price);\n\n\torder.product.push({ product_name: row.product_name, quantity, unit_price: unitPrice });\n\torder.order_total += quantity * unitPrice;\n}\n\n// One item per customer, so Cloud Office Print runs once per customer.\nreturn [...customers.values()].map((customer) => ({\n\tjson: {\n\t\tfileName: `invoice-${customer.cust_first_name}-${customer.cust_last_name}`.toLowerCase(),\n\t\tcopData: customer,\n\t},\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        1135
+      ],
+      "id": "218e5e61-97fc-422d-8bae-53b95db49deb",
+      "name": "Build document data"
+    },
+    {
+      "parameters": {
+        "content": "## Shape the data\n\nCode node, mode Run Once for All Items.\n\nGroups the flat rows into the nested structure the template tags expect and adds up `order_total`.\n\nReturns one item per customer. Every node after this then runs once per customer, so no loop is needed.",
+        "height": 586,
+        "width": 260,
+        "color": 1
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        509
+      ],
+      "id": "33d8c638-1192-4ca5-8aac-a56091a2c96f",
+      "name": "Sticky Note - Build document data"
+    },
+    {
+      "parameters": {
+        "resource": "documentGeneration",
+        "operation": "general",
+        "template": {
+          "fileConfig": {
+            "fileData": "={{ $('Template file as Base64').first().json.templateBase64 }}",
+            "mimeType": "docx"
+          }
+        },
+        "data": "={{ JSON.stringify($json.copData) }}",
+        "outputFileName": "={{ $json.fileName }}",
+        "outputType": "pdf"
+      },
+      "type": "CUSTOM.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        1135
+      ],
+      "id": "048de759-4077-43d1-882f-958e834017d1",
+      "name": "Cloud Office Print - Generate document"
+    },
+    {
+      "parameters": {
+        "content": "## Generate the document\n\nResource Document Generation.\n\nBase64 Encoded File: `{{ $('Template file as Base64').first().json.templateBase64 }}`. The template is the same for every customer, hence `.first()`.\n\nData (JSON): `{{ JSON.stringify($json.copData) }}`\n\nOutput Type: `pdf`. A docx template can also export to docx, html or txt.\n\nThe result comes back as Base64 in `body`.",
+        "height": 586,
+        "width": 260,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        509
+      ],
+      "id": "60621f74-0427-4eea-845d-f2604707a487",
+      "name": "Sticky Note - Cloud Office Print - Generate document"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "body",
+        "binaryPropertyName": "data",
+        "options": {
+          "fileName": "={{ $('Build document data').item.json.fileName }}.pdf",
+          "mimeType": "application/pdf"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1680,
+        1135
+      ],
+      "id": "5b239003-b9c4-42a8-8a36-c4c0a164b2ad",
+      "name": "Base64 result to PDF file"
+    },
+    {
+      "parameters": {
+        "content": "## Base64 to file\n\nConvert to File, operation Move Base64 String to File.\n\nBase64 Input Field: `body`\nPut Output File in Field: `data`\n\nDrive, S3 and mail nodes need real binary, not a string.",
+        "height": 586,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1660,
+        509
+      ],
+      "id": "c5030f2a-23dc-4c0b-83d3-b24f0b22ad52",
+      "name": "Sticky Note - Base64 result to PDF file"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Build document data').item.json.fileName }}.pdf",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1960,
+        1135
+      ],
+      "id": "bb76cc35-6b31-42fa-800b-23082455dbc7",
+      "name": "Upload generated PDF to Drive"
+    },
+    {
+      "parameters": {
+        "content": "## Save the result\n\nGoogle Drive, operation Upload File.\n\nInput Data Field Name: `data`\nFile Name: `{{ $('Build document data').item.json.fileName }}.pdf`\n\n`.item` follows the item that produced this one, so each customer gets the right name.\n\nReplace this node with Dropbox, S3 or Gmail to deliver elsewhere.",
+        "height": 586,
+        "width": 260,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        509
+      ],
+      "id": "68d7e8a7-ec5e-4eb0-8073-78fc40e83291",
+      "name": "Sticky Note - Upload generated PDF to Drive"
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Download DOCX template from Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download DOCX template from Drive": {
+      "main": [
+        [
+          {
+            "node": "Template file as Base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Template file as Base64": {
+      "main": [
+        [
+          {
+            "node": "Get order lines from Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get order lines from Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Build document data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build document data": {
+      "main": [
+        [
+          {
+            "node": "Cloud Office Print - Generate document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cloud Office Print - Generate document": {
+      "main": [
+        [
+          {
+            "node": "Base64 result to PDF file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Base64 result to PDF file": {
+      "main": [
+        [
+          {
+            "node": "Upload generated PDF to Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

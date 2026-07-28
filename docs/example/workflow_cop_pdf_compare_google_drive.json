@@ -1,0 +1,392 @@
+{
+  "name": "Cloud Office Print - Compare two PDFs from Google Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Compare two PDF versions\n\n**Before running:** set your credential on every Cloud Office Print, Google Drive and Google Sheets node, one by one. n8n does not copy credentials across imported nodes. Then pick your own files in the empty File and Document fields.\n\nDownloads two versions of a contract from Drive, compares them, and uploads a PDF marking the differences.\n\n### Setup\nUpload `docs/assets/samples/contract-v1.pdf` and `contract-v2.pdf` to your Drive, then select them in the two download nodes.",
+        "height": 380,
+        "width": 2220,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        0
+      ],
+      "id": "8ac7472b-c268-4182-8f02-200614b540ef",
+      "name": "Sticky Note - Overview"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        928
+      ],
+      "id": "4ff9bbd6-1146-44d9-878d-7dd2435ce1d2",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "content": "## Trigger\n\nRuns on demand.\n\nA Google Drive Trigger on a contracts folder also fits: compare each new upload against the approved version.",
+        "height": 478,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        410
+      ],
+      "id": "6fd94775-e18b-46c7-8449-dd257e80c376",
+      "name": "Sticky Note - When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        280,
+        928
+      ],
+      "id": "5f5accaf-debb-4dd9-8916-07fa611420f0",
+      "name": "Download contract v1 from Drive"
+    },
+    {
+      "parameters": {
+        "content": "## Old version\n\nGoogle Drive, operation Download File.\n\n**Pick the file.** The File field is empty on import. Click it and choose `contract-v1.pdf` from your Drive.\n\nThis is the baseline.",
+        "height": 478,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        410
+      ],
+      "id": "ea42bca7-9f69-4f3a-80c8-b6aee524933a",
+      "name": "Sticky Note - Download contract v1 from Drive"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "data",
+        "destinationKey": "contractV1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        928
+      ],
+      "id": "cb47c36d-d159-42de-81ba-2da7cba4a522",
+      "name": "Contract v1 as Base64"
+    },
+    {
+      "parameters": {
+        "content": "## Binary to Base64\n\nExtract from File, operation Move File to Base64 String.\n\nDestination Output Field: `contractV1`",
+        "height": 478,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        540,
+        410
+      ],
+      "id": "a22541f1-3b62-4313-8ac2-e7ef947f11db",
+      "name": "Sticky Note - Contract v1 as Base64"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        840,
+        928
+      ],
+      "id": "453a0b6f-0fb8-47b8-84eb-53fd2566b5e3",
+      "name": "Download contract v2 from Drive"
+    },
+    {
+      "parameters": {
+        "content": "## New version\n\nGoogle Drive, operation Download File.\n\n**Pick the file.** The File field is empty on import. Click it and choose `contract-v2.pdf` from your Drive.\n\nRuns after the first download, on the same item.",
+        "height": 478,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        820,
+        410
+      ],
+      "id": "f8715046-f7da-4fc0-8b2c-65b003f02fd2",
+      "name": "Sticky Note - Download contract v2 from Drive"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "data",
+        "destinationKey": "contractV2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        928
+      ],
+      "id": "d112427a-37bc-4d71-8cdb-e6cc4df1ade7",
+      "name": "Contract v2 as Base64"
+    },
+    {
+      "parameters": {
+        "content": "## Binary to Base64\n\nDestination Output Field: `contractV2`",
+        "height": 478,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        410
+      ],
+      "id": "089733aa-eeeb-4fed-8b4c-859a37f021a3",
+      "name": "Sticky Note - Contract v2 as Base64"
+    },
+    {
+      "parameters": {
+        "resource": "pdfCompare",
+        "operation": "pdfCompare",
+        "compare_file1": {
+          "fileConfig": {
+            "fileData": "={{ $('Contract v1 as Base64').first().json.contractV1 }}"
+          }
+        },
+        "compare_file2": {
+          "fileConfig": {
+            "fileData": "={{ $json.contractV2 }}"
+          }
+        }
+      },
+      "type": "CUSTOM.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        928
+      ],
+      "id": "d482e0cd-807c-4e8e-877c-e50baa92e91f",
+      "name": "Compare the two PDFs"
+    },
+    {
+      "parameters": {
+        "content": "## Compare\n\nResource PDF Compare.\n\nPDF File - 1: `{{ $('Contract v1 as Base64').first().json.contractV1 }}`\nPDF File - 2: `{{ $json.contractV2 }}`\n\nFile Type is hidden here because only PDFs are accepted.\n\nThe result is a PDF marking what changed, returned as Base64 in `body`.",
+        "height": 478,
+        "width": 260,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        410
+      ],
+      "id": "d3850cbd-0cbd-4e53-8a29-5e80de70d128",
+      "name": "Sticky Note - Compare the two PDFs"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "body",
+        "binaryPropertyName": "data",
+        "options": {
+          "fileName": "contract-comparison.pdf",
+          "mimeType": "application/pdf"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1680,
+        928
+      ],
+      "id": "22312cba-10b8-40cf-8869-506d7fa9e990",
+      "name": "Base64 result to PDF file"
+    },
+    {
+      "parameters": {
+        "content": "## Base64 to file\n\nConvert to File, operation Move Base64 String to File.\n\nBase64 Input Field: `body`",
+        "height": 478,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1660,
+        410
+      ],
+      "id": "90dee011-a918-4e10-8ff7-34716a7ab951",
+      "name": "Sticky Note - Base64 result to PDF file"
+    },
+    {
+      "parameters": {
+        "name": "contract-comparison.pdf",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1960,
+        928
+      ],
+      "id": "bc31e15e-652e-48a3-89de-586081117d5d",
+      "name": "Upload comparison PDF to Drive"
+    },
+    {
+      "parameters": {
+        "content": "## Save the result\n\nGoogle Drive, operation Upload File.\n\nAdd a Gmail or Slack node here to send the comparison to whoever approves contracts.",
+        "height": 478,
+        "width": 260,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        410
+      ],
+      "id": "f004021a-a499-47f4-8b85-a3235768e42e",
+      "name": "Sticky Note - Upload comparison PDF to Drive"
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Download contract v1 from Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download contract v1 from Drive": {
+      "main": [
+        [
+          {
+            "node": "Contract v1 as Base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contract v1 as Base64": {
+      "main": [
+        [
+          {
+            "node": "Download contract v2 from Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download contract v2 from Drive": {
+      "main": [
+        [
+          {
+            "node": "Contract v2 as Base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contract v2 as Base64": {
+      "main": [
+        [
+          {
+            "node": "Compare the two PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare the two PDFs": {
+      "main": [
+        [
+          {
+            "node": "Base64 result to PDF file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Base64 result to PDF file": {
+      "main": [
+        [
+          {
+            "node": "Upload comparison PDF to Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

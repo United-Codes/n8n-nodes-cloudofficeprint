@@ -2,9 +2,9 @@ import type { AllEntities } from 'n8n-workflow';
 
 type NodeMap = {
     documentGeneration: 'general';
-	pdfOperations: 'singlePagePDF' | 'watermarkPDF' | 'pdfMetadata';
+	pdfOperations: 'watermarkPDF' | 'convertFileToPDF' | 'mergeToPDF' | 'compressPDF';
     protectDocument: 'protectOfficeDocument' | 'protectPDF';
     pdfCompare: 'pdfCompare';
 };
 
-export type APEXOfficePrint = AllEntities<NodeMap>;
+export type CloudOfficePrint = AllEntities<NodeMap>;

@@ -1,3 +1,4 @@
 dist
 node_modules
-./tmp
+/tmp
+CHANGELOG.generated.md

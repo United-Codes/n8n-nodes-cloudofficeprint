@@ -6,25 +6,12 @@ import {
     ILoadOptionsFunctions,
     IPollFunctions,
     IDataObject,
-    JsonObject
+    JsonObject,
+    NodeApiError,
 } from 'n8n-workflow';
 
-import { NodeApiError } from 'n8n-workflow';
-
-/**
- * 
- * @param this - The execute functions
- * @param method - The HTTP method
- * @param resource - The resource
- * @param body - The body
- * @param qs - The query string
- * @param url - The URL
- * @param headers - The headers
- * @param option - The options
- * @returns The response
- * @throws {NodeApiError} If the request fails
- */
-export async function APEXOfficePrintRequest(
+/** Sends a request to the Cloud Office Print API with the credential's api key and mode applied. */
+export async function CloudOfficePrintRequest(
     this: IExecuteFunctions | IExecuteSingleFunctions | ILoadOptionsFunctions | IPollFunctions,
     method: IHttpRequestMethods,
     resource: string,
@@ -38,20 +25,12 @@ export async function APEXOfficePrintRequest(
 
     const apiUrl = credentials.apiBaseUrl as string;
     const apiKey = credentials.apiKey;
-
-    // const copLoggingData = {}
-    // try{
-    //     const workflowData = this.getWorkflowData();
-    //     copLoggingData.platform = 'COP n8n';
-    //     copLoggingData.workflow_id = workflowData.id;
-    //     copLoggingData.workflow_name = workflowData.name;
-    // }
-
+    const mode = credentials.mode as string;
 
     const requestBody: IDataObject = {
         ...body,
         api_key: apiKey,
-        // logging: copLoggingData
+        ...(mode === 'development' && { mode: 'development' }),
     };
 
     const options: IHttpRequestOptions = {
@@ -63,19 +42,28 @@ export async function APEXOfficePrintRequest(
             'Content-Type': 'application/json',
             ...headers,
         },
-
-        // 🔑 IMPORTANT FOR BASE64 / BINARY
-        // @ts-expect-error asd
+        // @ts-expect-error not in the type, but keeps the base64 response body unparsed
         encoding: null,
         returnFullResponse: true,
     };
 
-    // Merge optional overrides (timeout, proxy, etc.)
     Object.assign(options, option);
 
-    // Remove body for GET / empty payload
     if (!requestBody || Object.keys(requestBody).length === 0) {
         delete options.body;
+    }
+
+    let debugMode = false;
+    try {
+        debugMode = (this as IExecuteFunctions).getNodeParameter('debugMode', 0, false) as boolean;
+    } catch {
+        // parameter not available in this context (e.g. load options)
+    }
+    if (debugMode) {
+        return {
+            ...requestBody,
+            api_key: apiKey ? '<redacted>' : '',
+        };
     }
 
     try {
@@ -87,10 +75,10 @@ export async function APEXOfficePrintRequest(
             let errorDescription = ""
             if (error.response.headers['error_description']) {
                 errorDescription = error.response.headers['error_description'];
-                try{
+                try {
                     errorDescription = Buffer.from(errorDescription, 'base64').toString('utf-8');
-                }catch{
-                    // do nothing
+                } catch {
+                    // not base64, use as-is
                 }
                 copErrorFile = error.response.data;
             }

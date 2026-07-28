@@ -4,26 +4,27 @@ import type {
     INodeProperties,
 } from 'n8n-workflow';
 
-import { getFileDesc, getFilesData } from '../../utils/file_utils';
+import { getFileDesc, getFilesData, templateSupportedType, type FileNodeParameters } from '../../utils/file_utils';
 
 import {
     updateDisplayOptions,
     NodeOperationError,
-    // LoggerProxy as Logger
 } from 'n8n-workflow';
 
-import { APEXOfficePrintRequest } from '../../transport';
+import { CloudOfficePrintRequest } from '../../transport';
 import { outputTypeDesc } from '../../descriptions/common.description';
 
 export const properties: INodeProperties[] = [
-    getFileDesc('template', 'Template', 'Template file to use', false),
+    getFileDesc('template', 'Template', 'Template file to use', false, true, templateSupportedType),
     {
         displayName: 'Data (JSON)',
         name: 'data',
         type: 'json',
         default: '{}',
         required: true,
-        description: 'JSON data for processing',
+        placeholder: '{ "customer": "John Doe" }',
+        description: 'JSON data used to fill the tags in the template',
+        hint: 'Keys must match the tag names used in the template',
     },
     {
         displayName: 'Output File Name',
@@ -31,6 +32,8 @@ export const properties: INodeProperties[] = [
         type: 'string',
         default: 'output',
         required: true,
+        placeholder: 'e.g. invoice',
+        description: 'Name for the generated file, without extension',
     },
     outputTypeDesc,
 ];
@@ -44,23 +47,18 @@ const displayOptions = {
 
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
-    let template;
-    try {
-        const files = this.getNodeParameter( 'template.fileConfig', index) as { fileSource: string; fileData: string; filename: string; mimeType: string; }[];
-        template = getFilesData(files);
-    } catch (error) {
-        // No template is added
-        template = null;
-    }
+    const files = this.getNodeParameter('template.fileConfig', index, null) as FileNodeParameters | null;
+    const template = files ? getFilesData(files) : null;
     const data = this.getNodeParameter('data', index) as string;
     const dataObject = JSON.parse(data);
     if (!dataObject) {
         throw new NodeOperationError(this.getNode(), 'No data found. Please add data to the input.');
     }
+    const outputFileName = this.getNodeParameter('outputFileName', index) as string;
     const body: IDataObject = {
         template: template,
         files: [{
-            filename: 'input.pdf',
+            filename: outputFileName,
             data: dataObject,
         }],
         output: {
@@ -68,8 +66,7 @@ export async function execute(this: IExecuteFunctions, index: number) {
             output_encoding: 'base64',
         }
     };
-    // const responseData = body
-    const responseData = await APEXOfficePrintRequest.call(this, 'POST', '', body);
+    const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
     const executionData = this.helpers.constructExecutionMetaData(
         this.helpers.returnJsonArray(responseData as IDataObject),

@@ -16,19 +16,7 @@ export const fileDesc: INodeProperties = {
             displayName: 'File Configuration',
             values: [
                 {
-                    displayName: 'File Source',
-                    name: 'fileSource',
-                    type: 'options',
-                    default: 'url',
-                    options: [
-                        { name: 'URL', value: 'url' },
-                        { name: 'Base64', value: 'base64' },
-                        // { name: 'File Path', value: 'file' },
-                    ],
-                },
-
-                {
-                    displayName: 'File Data',
+                    displayName: 'Base64 Encoded File',
                     name: 'fileData',
                     type: 'string',
                     default: '',
@@ -36,36 +24,19 @@ export const fileDesc: INodeProperties = {
                     typeOptions: {
                         rows: 4,
                     },
-                    displayOptions: {
-                        show: {
-                            fileSource: [
-                                'url',
-                                'base64',
-                                // 'file'
-                            ],
-                        },
-                    },
-                    description:
-                        'URL, Base64 content, or file path depending on File Source',
+                    placeholder: 'e.g. JVBERi0xLjcKJcTl8uXr...',
+                    description: 'Content of the file encoded as Base64',
+                    hint: 'Paste the raw Base64 string only, without a data:...;base64, prefix',
                 },
-
                 {
-                    displayName: 'Filename',
-                    name: 'filename',
-                    type: 'string',
-                    placeholder: 'file.docx',
-                    default: '',
-                    required: true,
-                    description: 'Name of the file including extension',
-                },
-
-                {
-                    displayName: 'Mime Type',
+                    displayName: 'File Type',
                     name: 'mimeType',
                     type: 'options',
                     default: '',
                     options: [],
                     required: true,
+                    description: 'File type of the provided content',
+                    hint: 'Must match the actual type of the Base64 content',
                 },
             ],
         },
@@ -73,10 +44,10 @@ export const fileDesc: INodeProperties = {
 };
 
 export const outputTypeDesc: INodeProperties = {
-    displayName: 'Output Type',
+    displayName: 'Output Type Name or ID',
     name: 'outputType',
     type: 'options',
-    description: 'Output type for the given request',
+    description: 'Output type for the given request. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
     default: '',
     required: true,
     typeOptions: {

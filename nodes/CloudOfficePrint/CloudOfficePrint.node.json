@@ -1,19 +1,34 @@
 {
-	"node": "n8n-nodes-base.CloudOfficePrint",
+	"node": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": [
-		"Miscellaneous"
+		"Utility"
+	],
+	"alias": [
+		"PDF",
+		"DOCX",
+		"XLSX",
+		"PPTX",
+		"Convert",
+		"Compress",
+		"Merge",
+		"Watermark",
+		"Document",
+		"Report",
+		"Template",
+		"AOP",
+		"APEX Office Print"
 	],
 	"resources": {
 		"credentialDocumentation": [
 			{
-				"url": ""
+				"url": "https://www.cloudofficeprint.com/docs/n8n.html"
 			}
 		],
 		"primaryDocumentation": [
 			{
-				"url": ""
+				"url": "https://www.cloudofficeprint.com/docs/n8n.html"
 			}
 		]
 	}

@@ -9,21 +9,23 @@ import {
     NodeOperationError,
 } from 'n8n-workflow';
 
-import { APEXOfficePrintRequest } from '../../transport';
-import { getFileDesc, getFilesData } from '../../utils/file_utils';
+import { CloudOfficePrintRequest } from '../../transport';
+import { getFileDesc, getFilesData, appendPrependFileSupportedType, type FileNodeParameters } from '../../utils/file_utils';
 
 export const properties: INodeProperties[] = [
     getFileDesc(
         'file',
         'File',
-        'File to process (supports multiple files)',
+        'File to add a watermark to',
+        false,
         true,
-        true
+        appendPrependFileSupportedType,
     ),
     {
         displayName: 'Watermark Text',
         name: 'watermark_text',
-        description: 'Text to use as watermark',
+        description: 'Text placed diagonally across every page',
+        placeholder: 'e.g. CONFIDENTIAL',
         type: 'string',
         default: '',
     }, {
@@ -72,11 +74,11 @@ const displayOptions = {
 
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
-    const files = this.getNodeParameter(`file.fileConfig`, index) as { fileSource: string; fileData: string; filename: string; mimeType: string; }[];
-    if (!files || files.length === 0) {
+    const file = this.getNodeParameter('file.fileConfig', index, null) as FileNodeParameters | null;
+    if (!file) {
         throw new NodeOperationError(this.getNode(), 'No file configuration found. Please add a file to the input.');
     }
-    const filesData = getFilesData(files);
+    const filesData = getFilesData([file]);
 
     const watermarkText = this.getNodeParameter('watermark_text', index) as string;
     const watermarkColor = this.getNodeParameter('watermark_color', index) as string;
@@ -104,7 +106,7 @@ export async function execute(this: IExecuteFunctions, index: number) {
         }
     };
 
-    const responseData = await APEXOfficePrintRequest.call(this, 'POST', '', body);
+    const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
     const executionData = this.helpers.constructExecutionMetaData(
 

@@ -1,6 +1,6 @@
 import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import { NodeApiError, NodeOperationError } from 'n8n-workflow';
-import type { APEXOfficePrint } from './node.type';
+import type { CloudOfficePrint } from './node.type';
 
 import * as pdfOperations from './pdfOperations';
 import * as standardCOPCall from './standardCOPCall';
@@ -11,30 +11,30 @@ export async function router(this: IExecuteFunctions) {
     const items = this.getInputData();
     const returnData: INodeExecutionData[] = [];
 
-    const resource = this.getNodeParameter<APEXOfficePrint>('resource', 0) as string;
+    const resource = this.getNodeParameter<CloudOfficePrint>('resource', 0) as string;
     const operation = this.getNodeParameter('operation', 0);
 
     let responseData;
 
-    const apexOfficePrint = {
+    const cloudOfficePrint = {
         resource,
         operation,
-    } as APEXOfficePrint;
+    } as CloudOfficePrint;
 
     for (let i = 0; i < items.length; i++) {
         try {
-            switch (apexOfficePrint.resource) {
+            switch (cloudOfficePrint.resource) {
                 case 'pdfOperations':
-                    responseData = await pdfOperations[apexOfficePrint.operation].execute.call(this, i);
+                    responseData = await pdfOperations[cloudOfficePrint.operation].execute.call(this, i);
                     break;
                 case 'documentGeneration':
-                    responseData = await standardCOPCall[apexOfficePrint.operation].execute.call(this, i);
+                    responseData = await standardCOPCall[cloudOfficePrint.operation].execute.call(this, i);
                     break;
                 case 'protectDocument':
-                    responseData = await protectDocument[apexOfficePrint.operation].execute.call(this, i);
+                    responseData = await protectDocument[cloudOfficePrint.operation].execute.call(this, i);
                     break;
                 case 'pdfCompare':
-                    responseData = await pdfCompare[apexOfficePrint.operation].execute.call(this, i);
+                    responseData = await pdfCompare[cloudOfficePrint.operation].execute.call(this, i);
                     break;
                 default:
                     throw new NodeOperationError(this.getNode(), `The resource "${resource}" is not known`);
@@ -57,6 +57,7 @@ export async function router(this: IExecuteFunctions) {
                 }
                 error.context.itemIndex = i;
             }
+            // eslint-disable-next-line @n8n/community-nodes/require-node-api-error -- re-wrapping would drop the HTTP context set by the transport layer
             throw error;
         }
     }
