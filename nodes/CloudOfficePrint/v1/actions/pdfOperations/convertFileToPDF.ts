@@ -7,11 +7,11 @@ import {
     getFilesData,
     getSingleFileDesc,
     getSingleFileParameters,
-    templateSupportedType,
+    appendPrependFileSupportedType,
 } from '../../utils/file_utils';
 
 export const properties: INodeProperties[] = [
-    ...getSingleFileDesc('Content of the file to convert to PDF, encoded as Base64', templateSupportedType),
+    ...getSingleFileDesc('Content of the file to convert to PDF, encoded as Base64', appendPrependFileSupportedType),
     outputFileNameDesc,
 ];
 
@@ -25,7 +25,7 @@ const displayOptions = {
 export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions, index: number) {
-    const file = getSingleFileParameters(this, index, templateSupportedType);
+    const file = getSingleFileParameters(this, index, appendPrependFileSupportedType);
     const outputFileName = this.getNodeParameter('outputFileName', index) as string;
 
     const body: IDataObject = {

@@ -50,6 +50,7 @@ export const supportedMimeType = {
     "msg": "application/vnd.ms-outlook",
     "csv": "text/csv",
     "heic": "image/heic",
+    "heif": "image/heif",
     "avif": "image/avif",
     "xlsm": "application/vnd.ms-excel.sheet.macroEnabled.12",
     "ics": "text/calendar",
@@ -125,10 +126,7 @@ export function getFileDesc(
     };
 }
 
-/**
- * Builds the same two file fields as getFileDesc, but flattened to top level:
- * the operation always takes exactly one file, so there is no "Add File" button.
- */
+/** Same fields as getFileDesc, flattened to top level so no "Add File" button is needed. */
 export function getSingleFileDesc(
     description: string,
     allowedTypes: string[] = Object.keys(supportedMimeType),
@@ -143,10 +141,7 @@ export function getSingleFileDesc(
     return [dataField, mimeField];
 }
 
-/**
- * Reads the fields built by getSingleFileDesc. The type is re-checked against the operation's own
- * list, because n8n keeps the value when switching between operations that allow different types.
- */
+/** Reads the flattened file fields, rejecting a type left over from another operation. */
 export function getSingleFileParameters(
     ctx: IExecuteFunctions,
     index: number,

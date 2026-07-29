@@ -117,8 +117,7 @@ describe('getSingleFileParameters', () => {
     });
 
     it('uses the only allowed type instead of the stored value', () => {
-        // the type field is hidden for single-type operations, but n8n keeps the value
-        // of the operation the user came from
+        // n8n keeps the type of the operation the user came from
         const ctx = ctxWith({ fileData: 'AAAA', mimeType: 'docx' });
         expect(getSingleFileParameters(ctx, 0, ['pdf'])).toEqual({ fileData: 'AAAA', mimeType: 'pdf' });
     });
