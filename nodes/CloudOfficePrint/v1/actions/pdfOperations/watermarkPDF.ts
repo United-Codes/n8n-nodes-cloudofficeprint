@@ -4,23 +4,19 @@ import type {
     INodeProperties,
 } from 'n8n-workflow';
 
-import {
-    updateDisplayOptions,
-    NodeOperationError,
-} from 'n8n-workflow';
+import { updateDisplayOptions } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
-import { getFileDesc, getFilesData, appendPrependFileSupportedType, type FileNodeParameters } from '../../utils/file_utils';
+import { outputFileNameDesc } from '../../descriptions/common.description';
+import {
+    getFilesData,
+    getSingleFileDesc,
+    getSingleFileParameters,
+    appendPrependFileSupportedType,
+} from '../../utils/file_utils';
 
 export const properties: INodeProperties[] = [
-    getFileDesc(
-        'file',
-        'File',
-        'File to add a watermark to',
-        false,
-        true,
-        appendPrependFileSupportedType,
-    ),
+    ...getSingleFileDesc('Content of the file to add a watermark to, encoded as Base64', appendPrependFileSupportedType),
     {
         displayName: 'Watermark Text',
         name: 'watermark_text',
@@ -63,6 +59,7 @@ export const properties: INodeProperties[] = [
         },
         default: 45,
     },
+    outputFileNameDesc,
 ];
 
 const displayOptions = {
@@ -74,25 +71,22 @@ const displayOptions = {
 
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
-    const file = this.getNodeParameter('file.fileConfig', index, null) as FileNodeParameters | null;
-    if (!file) {
-        throw new NodeOperationError(this.getNode(), 'No file configuration found. Please add a file to the input.');
-    }
-    const filesData = getFilesData([file]);
+    const file = getSingleFileParameters(this, index, appendPrependFileSupportedType);
 
     const watermarkText = this.getNodeParameter('watermark_text', index) as string;
     const watermarkColor = this.getNodeParameter('watermark_color', index) as string;
     const watermarkFont = this.getNodeParameter('watermark_font', index) as string;
     const watermarkOpacity = this.getNodeParameter('watermark_opacity', index) as number;
     const watermarkSize = this.getNodeParameter('watermark_size', index) as number;
+    const outputFileName = this.getNodeParameter('outputFileName', index) as string;
 
     const body: IDataObject = {
-        append_files: filesData,
+        append_files: getFilesData([file]),
         template: {
             template_type: "converter"
         },
         files: [{
-            filename: 'input.pdf',
+            filename: outputFileName,
             data: [],
         }],
         output: {

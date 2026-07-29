@@ -1,7 +1,12 @@
 // vitest is a devDependency; tests are not shipped
 import { describe, expect, it } from 'vitest';
-import type { INodeProperties, INodePropertyCollection } from 'n8n-workflow';
-import { getFileDesc, getFilesData } from '../nodes/CloudOfficePrint/v1/utils/file_utils';
+import type { IExecuteFunctions, INodeProperties, INodePropertyCollection } from 'n8n-workflow';
+import {
+    getFileDesc,
+    getFilesData,
+    getSingleFileDesc,
+    getSingleFileParameters,
+} from '../nodes/CloudOfficePrint/v1/utils/file_utils';
 
 describe('getFilesData', () => {
     it('builds a Template from a single file config using the extension', () => {
@@ -70,5 +75,62 @@ describe('getFileDesc', () => {
         expect(field.type).toBe('hidden');
         expect(field.default).toBe('pdf');
         expect(field.options).toBeUndefined();
+    });
+});
+
+describe('getSingleFileDesc', () => {
+    it('returns both file fields at top level, so no collection has to be added', () => {
+        const [dataField, typeField] = getSingleFileDesc('x', ['docx', 'xlsx']);
+        expect(dataField.name).toBe('fileData');
+        expect(dataField.description).toBe('x');
+        expect(typeField.name).toBe('mimeType');
+        expect(typeField.options).toEqual([{ name: 'docx', value: 'docx' }, { name: 'xlsx', value: 'xlsx' }]);
+    });
+
+    it('hides the type select when only one type is supported', () => {
+        const [, typeField] = getSingleFileDesc('x', ['pdf']);
+        expect(typeField.type).toBe('hidden');
+        expect(typeField.default).toBe('pdf');
+        expect(typeField.options).toBeUndefined();
+    });
+
+    it('does not leak into the shared file description', () => {
+        getSingleFileDesc('x', ['pdf']);
+        const field = mimeField(getFileDesc('template', 'Template', 'y', false, true, ['docx', 'xlsx']));
+        expect(field.type).toBe('options');
+        expect(field.options).toEqual([{ name: 'docx', value: 'docx' }, { name: 'xlsx', value: 'xlsx' }]);
+    });
+});
+
+function ctxWith(parameters: Record<string, unknown>) {
+    return {
+        getNodeParameter: (name: string, _index: number, fallback?: unknown) =>
+            parameters[name] ?? fallback,
+        getNode: () => ({ name: 'Cloud Office Print' }),
+    } as unknown as IExecuteFunctions;
+}
+
+describe('getSingleFileParameters', () => {
+    it('reads the flattened fields', () => {
+        const ctx = ctxWith({ fileData: 'AAAA', mimeType: 'docx' });
+        expect(getSingleFileParameters(ctx, 0, ['docx', 'pdf'])).toEqual({ fileData: 'AAAA', mimeType: 'docx' });
+    });
+
+    it('uses the only allowed type instead of the stored value', () => {
+        // the type field is hidden for single-type operations, but n8n keeps the value
+        // of the operation the user came from
+        const ctx = ctxWith({ fileData: 'AAAA', mimeType: 'docx' });
+        expect(getSingleFileParameters(ctx, 0, ['pdf'])).toEqual({ fileData: 'AAAA', mimeType: 'pdf' });
+    });
+
+    it('rejects a type the operation does not support', () => {
+        const ctx = ctxWith({ fileData: 'AAAA', mimeType: 'xlsm' });
+        expect(() => getSingleFileParameters(ctx, 0, ['pdf', 'docx']))
+            .toThrow('Unsupported file type: xlsm');
+    });
+
+    it('rejects an empty file', () => {
+        const ctx = ctxWith({ fileData: '', mimeType: 'pdf' });
+        expect(() => getSingleFileParameters(ctx, 0, ['pdf'])).toThrow('No file content found');
     });
 });

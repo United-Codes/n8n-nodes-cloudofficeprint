@@ -2,6 +2,7 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 import { updateDisplayOptions, NodeOperationError } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
+import { outputFileNameDesc } from '../../descriptions/common.description';
 import { getFileDesc, getFilesData, appendPrependFileSupportedType, type FileNodeParameters } from '../../utils/file_utils';
 
 export const properties: INodeProperties[] = [
@@ -13,6 +14,7 @@ export const properties: INodeProperties[] = [
         true,
         appendPrependFileSupportedType,
     ),
+    outputFileNameDesc,
 ];
 
 const displayOptions = {
@@ -30,12 +32,14 @@ export async function execute(this: IExecuteFunctions, index: number) {
         throw new NodeOperationError(this.getNode(), 'No files found. Please add at least one file to merge.');
     }
 
+    const outputFileName = this.getNodeParameter('outputFileName', index) as string;
+
     const body: IDataObject = {
         // converter template: inputs are converted and appended to the output PDF
         template: { template_type: 'converter' },
         append_files: getFilesData(files),
         files: [{
-            filename: 'output.pdf',
+            filename: outputFileName,
             data: [],
         }],
         output: {
