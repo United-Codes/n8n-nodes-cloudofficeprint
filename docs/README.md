@@ -75,8 +75,6 @@ Each action maps to a **Resource** and an **Operation**:
 
 Every action takes files the same way. In the **File** section, click **Add File** and fill in:
 
-(The PDF Operations, apart from Merge, and both Password Protect actions always take exactly one file, so their fields are shown directly, without an **Add File** button. Compress PDF and Password Protect PDF only accept a PDF, so they have no **File Type** field.)
-
 ![File Configuration](images/04-file-input.webp)
 
 | Field | What to enter |
