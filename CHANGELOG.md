@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 - 2026-07-28
+
+### Fixed
+- Password fields on Protect Office File and Protect PDF are now masked in the UI.
+- API errors are always raised as NodeApiError, so the failing item index is reported on every error.
+
 ## 0.1.0 - 2026-07-28
 
 ### Added

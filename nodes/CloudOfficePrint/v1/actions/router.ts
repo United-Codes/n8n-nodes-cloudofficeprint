@@ -1,4 +1,4 @@
-import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
+import type { IExecuteFunctions, INodeExecutionData, JsonObject } from 'n8n-workflow';
 import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 import type { CloudOfficePrint } from './node.type';
 
@@ -57,8 +57,8 @@ export async function router(this: IExecuteFunctions) {
                 }
                 error.context.itemIndex = i;
             }
-            // eslint-disable-next-line @n8n/community-nodes/require-node-api-error -- re-wrapping would drop the HTTP context set by the transport layer
-            throw error;
+            // NodeApiError is returned as-is by this constructor, other errors get wrapped
+            throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex: i });
         }
     }
     return [returnData];
