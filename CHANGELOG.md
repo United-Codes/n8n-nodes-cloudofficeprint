@@ -3,14 +3,12 @@
 ## 0.1.2 - 2026-07-29
 
 ### Added
-- Output File Name on Convert to PDF, Compress PDF, Merge to Single PDF File, PDF Watermark, and Password Protect PDF. Defaults to `output`, without extension.
+- Output File Name on every PDF Operation and both Password Protect actions, so the result is no longer always named `output.pdf`.
 
 ### Changed
-- Convert to PDF sends the file in `prepend_files` instead of using it as the template.
-- Convert to PDF, Compress PDF, PDF Watermark, and Password Protect PDF always take one file, so their Base64 Encoded File and File Type fields are shown directly on the node, without an Add File button. Workflows saved with an earlier version need the file re-entered on these four operations.
+- Actions that take a single file show Base64 Encoded File and File Type directly on the node, without the Add File button: Convert to PDF, Compress PDF, PDF Watermark, and both Password Protect actions. Re-enter the file on these actions in workflows saved with an earlier version.
+- Convert to PDF converts through `prepend_files` key.
 
-### Fixed
-- The file type of a single-file operation is checked against the types that operation accepts, instead of silently reusing the value left over from another operation.
 
 ## 0.1.1 - 2026-07-29
 

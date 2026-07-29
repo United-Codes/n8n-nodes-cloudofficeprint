@@ -50,7 +50,6 @@ export const supportedMimeType = {
     "msg": "application/vnd.ms-outlook",
     "csv": "text/csv",
     "heic": "image/heic",
-    "heif": "image/heif",
     "avif": "image/avif",
     "xlsm": "application/vnd.ms-excel.sheet.macroEnabled.12",
     "ics": "text/calendar",
@@ -75,7 +74,7 @@ export const supportedOutputTypeBasedOnTemplate: { [key in keyof typeof supporte
     "xml": ["xml"]
 }
 
-export const appendPrependFileSupportedType = ["pdf", "docx", "docm", "xlsx", "pptx", "pptm", "html", "md", "txt", "gif", "jpeg", "jpg", "png", "svg", "webp", "bmp", "msbmp", "doc", "ppt", "xls", "odt", "ods", "odp", "eml", "msg", "csv", "heic", "heif", "avif"]
+export const appendPrependFileSupportedType = ["pdf", "docx", "docm", "xlsx", "pptx", "pptm", "html", "md", "txt", "gif", "jpeg", "jpg", "png", "svg", "webp", "bmp", "msbmp", "doc", "ppt", "xls", "odt", "ods", "odp", "eml", "msg", "csv", "heic", "avif"]
 export const templateSupportedType = ["docx", "docm", "xlsx", "xlsm", "pptx", "pptm", "html", "md", "txt", "csv", "pdf", "ics", "ifb", "xml"];
 export const subtemplatesSupportedType = ["docx", "pptx"];
 

@@ -75,7 +75,7 @@ Each action maps to a **Resource** and an **Operation**:
 
 Every action takes files the same way. In the **File** section, click **Add File** and fill in:
 
-(**Convert to PDF**, **Compress PDF**, **PDF Watermark**, and **Password Protect PDF** always take exactly one file, so their fields are shown directly, without an **Add File** button. Compress PDF and Password Protect PDF only accept a PDF, so they have no **File Type** field.)
+(The PDF Operations, apart from Merge, and both Password Protect actions always take exactly one file, so their fields are shown directly, without an **Add File** button. Compress PDF and Password Protect PDF only accept a PDF, so they have no **File Type** field.)
 
 ![File Configuration](images/04-file-input.webp)
 
@@ -128,7 +128,7 @@ The node returns a PDF that reads *Dear John Doe, your invoice total is $250.00.
 | Field | What to enter |
 | --- | --- |
 | **Base64 Encoded File** | The file to convert, as a raw Base64 string. |
-| **File Type** | Allowed: `docx`, `docm`, `xlsx`, `xlsm`, `pptx`, `pptm`, `html`, `md`, `txt`, `csv`, `pdf`, `ics`, `ifb`, `xml`. |
+| **File Type** | Office files, images, mails, and text: `pdf`, `docx`, `docm`, `xlsx`, `pptx`, `pptm`, `html`, `md`, `txt`, `csv`, `doc`, `xls`, `ppt`, `odt`, `ods`, `odp`, `eml`, `msg`, `gif`, `jpeg`, `jpg`, `png`, `svg`, `webp`, `bmp`, `msbmp`, `heic`, `avif`. |
 | **Output File Name** | Name of the returned PDF, without extension. |
 
 **Compress PDF** reduces a PDF's size.
@@ -174,12 +174,14 @@ The node returns the PDF with the watermark stamped diagonally on every page.
 
 ### Password Protect Document
 
-**Password Protect Office Documents** locks a Word, Excel, or PowerPoint file.
+**Password Protect Office Documents** locks a Word, Excel, or PowerPoint file. The result keeps the type it came in as.
 
 | Field | What to enter |
 | --- | --- |
-| **File** | One `docx`, `xlsx`, or `pptx` file. |
+| **Base64 Encoded File** | The document to protect, as a raw Base64 string. |
+| **File Type** | `docx`, `xlsx`, or `pptx`. |
 | **Password** | Password needed to open the document. |
+| **Output File Name** | Name of the returned file, without extension. |
 
 **Password Protect PDF** locks a PDF.
 
