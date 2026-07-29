@@ -117,12 +117,8 @@
       "parameters": {
         "resource": "pdfOperations",
         "operation": "convertFileToPDF",
-        "template": {
-          "fileConfig": {
-            "fileData": "={{ $json.documentBase64 }}",
-            "mimeType": "docx"
-          }
-        }
+        "fileData": "={{ $json.documentBase64 }}",
+        "mimeType": "docx"
       },
       "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
       "typeVersion": 1,
@@ -153,12 +149,8 @@
       "parameters": {
         "resource": "pdfOperations",
         "operation": "watermarkPDF",
-        "file": {
-          "fileConfig": {
-            "fileData": "={{ $json.body }}",
-            "mimeType": "pdf"
-          }
-        },
+        "fileData": "={{ $json.body }}",
+        "mimeType": "pdf",
         "watermark_text": "CONFIDENTIAL",
         "watermark_color": "#D3D3D3",
         "watermark_font": "Arial",
@@ -194,12 +186,8 @@
       "parameters": {
         "resource": "pdfOperations",
         "operation": "compressPDF",
-        "template": {
-          "fileConfig": {
-            "fileData": "={{ $json.body }}",
-            "mimeType": "pdf"
-          }
-        }
+        "fileData": "={{ $json.body }}",
+        "mimeType": "pdf"
       },
       "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
       "typeVersion": 1,
