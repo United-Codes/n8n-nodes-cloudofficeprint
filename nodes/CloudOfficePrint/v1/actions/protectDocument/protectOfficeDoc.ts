@@ -28,8 +28,8 @@ export const properties: INodeProperties[] = [
         displayName: 'Password',
         name: 'read_password',
         description: 'Password required to open the document',
-        // eslint-disable-next-line n8n-nodes-base/node-param-type-options-password-missing
         type: 'string',
+        typeOptions: { password: true },
         default: '',
     }
 ];
