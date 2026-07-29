@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.1 - 2026-07-28
+## 0.1.1 - 2026-07-29
 
 ### Fixed
 - Password fields on Protect Office File and Protect PDF are now masked in the UI.
