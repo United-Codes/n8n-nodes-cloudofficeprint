@@ -12,7 +12,7 @@ import {
 } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
-import { outputTypeDesc } from '../../descriptions/common.description';
+import { outputFileNameDesc, outputTypeDesc } from '../../descriptions/common.description';
 
 export const properties: INodeProperties[] = [
     getFileDesc('template', 'Template', 'Template file to use', false, true, templateSupportedType),
@@ -26,15 +26,7 @@ export const properties: INodeProperties[] = [
         description: 'JSON data used to fill the tags in the template',
         hint: 'Keys must match the tag names used in the template',
     },
-    {
-        displayName: 'Output File Name',
-        name: 'outputFileName',
-        type: 'string',
-        default: 'output',
-        required: true,
-        placeholder: 'e.g. invoice',
-        description: 'Name for the generated file, without extension',
-    },
+    outputFileNameDesc,
     outputTypeDesc,
 ];
 

@@ -71,7 +71,7 @@ Every action takes files as Base64 and returns the result as Base64. Most of a w
 
 ### Giving the node a file
 
-Each action has a file section — named **Template**, **File**, **Files** or **PDF File - 1** and **PDF File - 2**, depending on the action. Click the section's **Add** button and fill in:
+Every action asks for the same two fields:
 
 - **Base64 Encoded File** – the file content as a raw Base64 string. No `data:...;base64,` prefix.
 - **File Type** – the extension, for example `docx` or `pdf`. It must match the actual content. The field is hidden when the action accepts only one type.

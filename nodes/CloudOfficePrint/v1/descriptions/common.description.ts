@@ -43,6 +43,16 @@ export const fileDesc: INodeProperties = {
     ],
 };
 
+export const outputFileNameDesc: INodeProperties = {
+    displayName: 'Output File Name',
+    name: 'outputFileName',
+    type: 'string',
+    default: 'output',
+    required: true,
+    placeholder: 'e.g. invoice',
+    description: 'Name for the generated file, without extension',
+};
+
 export const outputTypeDesc: INodeProperties = {
     displayName: 'Output Type Name or ID',
     name: 'outputType',

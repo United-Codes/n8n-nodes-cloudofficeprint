@@ -125,19 +125,23 @@ The node returns a PDF that reads *Dear John Doe, your invoice total is $250.00.
 
 | Field | What to enter |
 | --- | --- |
-| **File** | One file. Allowed: `docx`, `docm`, `xlsx`, `xlsm`, `pptx`, `pptm`, `html`, `md`, `txt`, `csv`, `pdf`, `ics`, `ifb`, `xml`. |
+| **Base64 Encoded File** | The file to convert, as a raw Base64 string. |
+| **File Type** | Office files, images, mails, and text: `pdf`, `docx`, `docm`, `xlsx`, `pptx`, `pptm`, `html`, `md`, `txt`, `csv`, `doc`, `xls`, `ppt`, `odt`, `ods`, `odp`, `eml`, `msg`, `gif`, `jpeg`, `jpg`, `png`, `svg`, `webp`, `bmp`, `msbmp`, `heic`, `avif`. |
+| **Output File Name** | Name of the returned PDF, without extension. |
 
 **Compress PDF** reduces a PDF's size.
 
 | Field | What to enter |
 | --- | --- |
-| **File** | One PDF. |
+| **Base64 Encoded File** | The PDF to compress, as a raw Base64 string. |
+| **Output File Name** | Name of the returned PDF, without extension. |
 
 **Merge to Single PDF File** converts and joins several files into one PDF, in order.
 
 | Field | What to enter |
 | --- | --- |
 | **Files** | Two or more files. Click **Add File** for each. Office files and images are converted and appended. |
+| **Output File Name** | Name of the returned PDF, without extension. |
 
 **PDF Watermark** writes text diagonally across every page.
 
@@ -145,12 +149,14 @@ The node returns a PDF that reads *Dear John Doe, your invoice total is $250.00.
 
 | Field | What to enter |
 | --- | --- |
-| **File** | One PDF. |
+| **Base64 Encoded File** | The file to stamp, as a raw Base64 string. |
+| **File Type** | The file's type, for example `pdf`, `docx`. |
 | **Watermark Text** | The text to stamp. |
 | **Watermark Color** | Color of the text. |
 | **Watermark Font** | Font name. |
 | **Watermark Opacity in %** | `0` to `100`. |
 | **Watermark Size** | Text size in px, `1` to `1000`. |
+| **Output File Name** | Name of the returned PDF, without extension. |
 
 **Example**
 
@@ -158,7 +164,7 @@ Stamp every page of a PDF with a diagonal grey watermark:
 
 ![PDF Watermark example](images/12-watermark-example.webp)
 
-- **File**: the PDF as Base64, with **File Type** `pdf`.
+- **Base64 Encoded File**: the PDF as Base64, with **File Type** `pdf`.
 - **Watermark Text**: `all rights reserved`.
 - **Watermark Color** `#D3D3D3`, **Opacity** `50`, **Size** `45`.
 
@@ -166,20 +172,23 @@ The node returns the PDF with the watermark stamped diagonally on every page.
 
 ### Password Protect Document
 
-**Password Protect Office Documents** locks a Word, Excel, or PowerPoint file.
+**Password Protect Office Documents** locks a Word, Excel, or PowerPoint file. The result keeps the type it came in as.
 
 | Field | What to enter |
 | --- | --- |
-| **File** | One `docx`, `xlsx`, or `pptx` file. |
+| **Base64 Encoded File** | The document to protect, as a raw Base64 string. |
+| **File Type** | `docx`, `xlsx`, or `pptx`. |
 | **Password** | Password needed to open the document. |
+| **Output File Name** | Name of the returned file, without extension. |
 
 **Password Protect PDF** locks a PDF.
 
 | Field | What to enter |
 | --- | --- |
-| **File** | One PDF. |
+| **Base64 Encoded File** | The PDF to protect, as a raw Base64 string. |
 | **Read Password** | Password needed to open the PDF. Leave empty to skip. |
 | **Modify Password** | Password needed to edit the PDF. Leave empty to skip. |
+| **Output File Name** | Name of the returned PDF, without extension. |
 
 ### PDF Compare
 

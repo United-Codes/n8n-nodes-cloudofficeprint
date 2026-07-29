@@ -1,18 +1,15 @@
-import type { IExecuteFunctions, INodeProperties } from 'n8n-workflow';
+import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { updateDisplayOptions } from 'n8n-workflow';
 
-import { getFileDesc } from '../../utils/file_utils';
-import { runFileToPdf } from './runFileToPdf';
+import { CloudOfficePrintRequest } from '../../transport';
+import { outputFileNameDesc } from '../../descriptions/common.description';
+import { getFilesData, getSingleFileDesc, getSingleFileParameters } from '../../utils/file_utils';
+
+const supportedTypes = ['pdf'];
 
 export const properties: INodeProperties[] = [
-    getFileDesc(
-        'template',
-        'File',
-        'PDF file to compress',
-        false,
-        true,
-        ['pdf'],
-    ),
+    ...getSingleFileDesc('Content of the PDF to compress, encoded as Base64', supportedTypes),
+    outputFileNameDesc,
 ];
 
 const displayOptions = {
@@ -25,5 +22,26 @@ const displayOptions = {
 export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions, index: number) {
-    return runFileToPdf(this, index, 'template', { output_compress_pdf: true });
+    const file = getSingleFileParameters(this, index, supportedTypes);
+    const outputFileName = this.getNodeParameter('outputFileName', index) as string;
+
+    const body: IDataObject = {
+        template: getFilesData(file),
+        files: [{
+            filename: outputFileName,
+            data: [],
+        }],
+        output: {
+            output_type: 'pdf',
+            output_encoding: 'base64',
+            output_compress_pdf: true,
+        },
+    };
+
+    const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
+
+    return this.helpers.constructExecutionMetaData(
+        this.helpers.returnJsonArray(responseData as IDataObject),
+        { itemData: { item: index } },
+    );
 }

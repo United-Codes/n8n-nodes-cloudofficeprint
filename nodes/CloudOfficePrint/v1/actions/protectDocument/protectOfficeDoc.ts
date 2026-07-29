@@ -4,26 +4,16 @@ import type {
     INodeProperties,
 } from 'n8n-workflow';
 
-import { getFileDesc, getFilesData, type FileNodeParameters, Template  } from '../../utils/file_utils';
-
-
-import {
-    updateDisplayOptions,
-    NodeOperationError,
-} from 'n8n-workflow';
+import { updateDisplayOptions } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
+import { outputFileNameDesc } from '../../descriptions/common.description';
+import { getFilesData, getSingleFileDesc, getSingleFileParameters } from '../../utils/file_utils';
 
+const supportedTypes = ['docx', 'xlsx', 'pptx'];
 
 export const properties: INodeProperties[] = [
-    getFileDesc(
-        'file',
-        'File',
-        'Office document to protect',
-        false,
-        true,
-        ['docx', 'xlsx', 'pptx'],
-    ),
+    ...getSingleFileDesc('Content of the Office document to protect, encoded as Base64', supportedTypes),
     {
         displayName: 'Password',
         name: 'read_password',
@@ -31,7 +21,8 @@ export const properties: INodeProperties[] = [
         type: 'string',
         typeOptions: { password: true },
         default: '',
-    }
+    },
+    outputFileNameDesc,
 ];
 
 const displayOptions = {
@@ -44,21 +35,17 @@ const displayOptions = {
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
     const readPassword = this.getNodeParameter('read_password', index) as string;
-    const files = this.getNodeParameter('file.fileConfig', index, null) as FileNodeParameters | null;
-    if (!files) {
-        throw new NodeOperationError(this.getNode(), 'No file configuration found. Please add a file to the input.');
-    }
-    const template = getFilesData(files);
-
+    const file = getSingleFileParameters(this, index, supportedTypes);
+    const outputFileName = this.getNodeParameter('outputFileName', index) as string;
 
     const body: IDataObject = {
-        template: template,
+        template: getFilesData(file),
         files: [{
-            filename: 'output.pdf',
+            filename: outputFileName,
             data: [],
         }],
         output: {
-            output_type: (template as Template).template_type,
+            output_type: file.mimeType,
             output_encoding: 'base64',
             output_read_password: readPassword,
         }

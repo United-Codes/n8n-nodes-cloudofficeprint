@@ -4,23 +4,16 @@ import type {
     INodeProperties,
 } from 'n8n-workflow';
 
-import {
-    updateDisplayOptions,
-    NodeOperationError,
-} from 'n8n-workflow';
+import { updateDisplayOptions } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
-import { getFileDesc, getFilesData, type FileNodeParameters } from '../../utils/file_utils';
+import { outputFileNameDesc } from '../../descriptions/common.description';
+import { getFilesData, getSingleFileDesc, getSingleFileParameters } from '../../utils/file_utils';
+
+const supportedTypes = ['pdf'];
 
 export const properties: INodeProperties[] = [
-    getFileDesc(
-        'template',
-        'File',
-        'PDF file to protect',
-        false,
-        true,
-        ['pdf'],
-    ),
+    ...getSingleFileDesc('Content of the PDF to protect, encoded as Base64', supportedTypes),
     {
         displayName: 'Read Password',
         name: 'read_password',
@@ -36,7 +29,8 @@ export const properties: INodeProperties[] = [
         type: 'string',
         typeOptions: { password: true },
         default: '',
-    }
+    },
+    outputFileNameDesc,
 ];
 
 const displayOptions = {
@@ -50,16 +44,13 @@ export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
     const readPassword = this.getNodeParameter('read_password', index) as string;
     const modifyPassword = this.getNodeParameter('modify_password', index) as string;
-    const files = this.getNodeParameter('template.fileConfig', index, null) as FileNodeParameters | null;
-    if (!files) {
-        throw new NodeOperationError(this.getNode(), 'No file configuration found. Please add a file to the input.');
-    }
-    const filesData = getFilesData(files);
+    const file = getSingleFileParameters(this, index, supportedTypes);
+    const outputFileName = this.getNodeParameter('outputFileName', index) as string;
 
     const body: IDataObject = {
-        template: filesData,
+        template: getFilesData(file),
         files: [{
-            filename: 'output.pdf',
+            filename: outputFileName,
             data: [],
         }],
         output: {

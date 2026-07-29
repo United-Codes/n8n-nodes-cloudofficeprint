@@ -1,4 +1,5 @@
-import type { INodeProperties, INodePropertyCollection } from 'n8n-workflow';
+import type { IExecuteFunctions, INodeProperties, INodePropertyCollection } from 'n8n-workflow';
+import { NodeOperationError } from 'n8n-workflow';
 import { fileDesc } from '../descriptions/common.description';
 
 type File = {
@@ -73,9 +74,22 @@ export const supportedOutputTypeBasedOnTemplate: { [key in keyof typeof supporte
     "xml": ["xml"]
 }
 
-export const appendPrependFileSupportedType = ["pdf", "docx", "docm", "xlsx", "pptx", "pptm", "html", "md", "txt", "gif", "jpeg", "jpg", "png", "svg", "webp", "bmp", "msbmp", "doc", "ppt", "xls", "odt", "ods", "odp", "eml", "msg", "csv", "heic", "heif", "avif"]
+export const appendPrependFileSupportedType = ["pdf", "docx", "docm", "xlsx", "pptx", "pptm", "html", "md", "txt", "gif", "jpeg", "jpg", "png", "svg", "webp", "bmp", "msbmp", "doc", "ppt", "xls", "odt", "ods", "odp", "eml", "msg", "csv", "heic", "avif"]
 export const templateSupportedType = ["docx", "docm", "xlsx", "xlsm", "pptx", "pptm", "html", "md", "txt", "csv", "pdf", "ics", "ifb", "xml"];
 export const subtemplatesSupportedType = ["docx", "pptx"];
+
+/** Limits the file type select to the allowed types, hiding it when only one is allowed. */
+function applyAllowedTypes(mimeField: INodeProperties, allowedTypes: string[]) {
+    if (allowedTypes.length === 1) {
+        // single supported type: no need to show a select
+        mimeField.type = 'hidden';
+        mimeField.default = allowedTypes[0];
+        delete mimeField.options;
+        delete mimeField.hint;
+    } else {
+        mimeField.options = allowedTypes.map((extension) => ({ name: extension, value: extension }));
+    }
+}
 
 /** Builds a file collection property with the given allowed file types. */
 export function getFileDesc(
@@ -98,15 +112,7 @@ export function getFileDesc(
 
     const collection = desc.options?.[0] as INodePropertyCollection;
     const mimeField = collection.values.find((value) => value.name === 'mimeType') as INodeProperties;
-    if (allowedTypes.length === 1) {
-        // single supported type: no need to show a select
-        mimeField.type = 'hidden';
-        mimeField.default = allowedTypes[0];
-        delete mimeField.options;
-        delete mimeField.hint;
-    } else {
-        mimeField.options = allowedTypes.map((extension) => ({ name: extension, value: extension }));
-    }
+    applyAllowedTypes(mimeField, allowedTypes);
 
     return {
         ...desc,
@@ -117,6 +123,45 @@ export function getFileDesc(
         typeOptions,
         required,
     };
+}
+
+/** Same fields as getFileDesc, flattened to top level so no "Add File" button is needed. */
+export function getSingleFileDesc(
+    description: string,
+    allowedTypes: string[] = Object.keys(supportedMimeType),
+): INodeProperties[] {
+    const collection = structuredClone(fileDesc).options?.[0] as INodePropertyCollection;
+    const dataField = collection.values.find((value) => value.name === 'fileData') as INodeProperties;
+    const mimeField = collection.values.find((value) => value.name === 'mimeType') as INodeProperties;
+
+    dataField.description = description;
+    applyAllowedTypes(mimeField, allowedTypes);
+
+    return [dataField, mimeField];
+}
+
+/** Reads the flattened file fields, rejecting a type left over from another operation. */
+export function getSingleFileParameters(
+    ctx: IExecuteFunctions,
+    index: number,
+    allowedTypes: string[],
+): FileNodeParameters {
+    const fileData = ctx.getNodeParameter('fileData', index, '') as string;
+    if (!fileData) {
+        throw new NodeOperationError(ctx.getNode(), 'No file content found. Please provide the Base64 encoded file.');
+    }
+
+    const mimeType = allowedTypes.length === 1
+        ? allowedTypes[0]
+        : ctx.getNodeParameter('mimeType', index, '') as string;
+    if (!allowedTypes.includes(mimeType)) {
+        throw new NodeOperationError(
+            ctx.getNode(),
+            `Unsupported file type: ${mimeType || 'none selected'}. Allowed types: ${allowedTypes.join(', ')}.`,
+        );
+    }
+
+    return { fileData, mimeType };
 }
 
 function extensionToMime(extension: string): string {
