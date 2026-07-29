@@ -71,10 +71,12 @@ Every action takes files as Base64 and returns the result as Base64. Most of a w
 
 ### Giving the node a file
 
-Each action has a file section — named **Template**, **File**, **Files** or **PDF File - 1** and **PDF File - 2**, depending on the action. Click the section's **Add** button and fill in:
+Every action asks for the same two fields:
 
 - **Base64 Encoded File** – the file content as a raw Base64 string. No `data:...;base64,` prefix.
 - **File Type** – the extension, for example `docx` or `pdf`. It must match the actual content. The field is hidden when the action accepts only one type.
+
+**Convert to PDF**, **Compress PDF**, **PDF Watermark** and **Password Protect PDF** take a single file, so the two fields are shown directly on the node. The other actions keep them in a file section — named **Template**, **File**, **Files** or **PDF File - 1** and **PDF File - 2** — which you open with the section's **Add** button.
 
 **Merge to Single PDF File** takes two or more files; click **Add Files** once per file, as they are merged in the order listed. **PDF Compare** takes one file in each of its two sections. Every other action takes a single file.
 

@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-cloudofficeprint",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "CloudOfficePrint nodes for n8n",
 	"license": "MIT",
 	"homepage": "https://github.com/United-Codes/n8n-nodes-cloudofficeprint",
