@@ -32,6 +32,42 @@ export class CloudOfficePrint implements INodeType {
                 required: true,
             },
         ],
+        codex: {
+            categories: ['Utility'],
+            alias: [
+                'PDF',
+                'DOCX',
+                'XLSX',
+                'PPTX',
+                'Convert',
+                'Compress',
+                'Merge',
+                'Split',
+                'Watermark',
+                'Form',
+                'Fill',
+                'Attachment',
+                'Image',
+                'JPEG',
+                'Document',
+                'Report',
+                'Template',
+                'AOP',
+                'APEX Office Print',
+            ],
+            resources: {
+                credentialDocumentation: [
+                    {
+                        url: 'https://www.cloudofficeprint.com/docs/n8n.html',
+                    },
+                ],
+                primaryDocumentation: [
+                    {
+                        url: 'https://www.cloudofficeprint.com/docs/n8n.html',
+                    },
+                ],
+            },
+        },
         properties: [
             {
                 displayName: 'Resource',
