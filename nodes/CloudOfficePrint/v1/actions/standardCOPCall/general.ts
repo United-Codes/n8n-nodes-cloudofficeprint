@@ -4,7 +4,8 @@ import type {
     INodeProperties,
 } from 'n8n-workflow';
 
-import { getFileDesc, getFilesData, templateSupportedType, type FileNodeParameters } from '../../utils/file_utils';
+import { fileFieldNames, getFileFields, resolveTemplate, templateSupportedType } from '../../utils/file_utils';
+import { extensionForOutputType, toNodeOutput } from '../../utils/output_utils';
 
 import {
     updateDisplayOptions,
@@ -12,10 +13,12 @@ import {
 } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
-import { outputFileNameDesc, outputTypeDesc } from '../../descriptions/common.description';
+import { outputBinaryPropertyDesc, outputFileNameDesc, outputTypeDesc } from '../../descriptions/common.description';
+
+const templateNames = fileFieldNames('template');
 
 export const properties: INodeProperties[] = [
-    getFileDesc('template', 'Template', 'Template file to use', false, true, templateSupportedType),
+    ...getFileFields(templateNames, templateSupportedType, 'Template'),
     {
         displayName: 'Data (JSON)',
         name: 'data',
@@ -28,6 +31,7 @@ export const properties: INodeProperties[] = [
     },
     outputFileNameDesc,
     outputTypeDesc,
+    outputBinaryPropertyDesc,
 ];
 
 const displayOptions = {
@@ -39,14 +43,14 @@ const displayOptions = {
 
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
-    const files = this.getNodeParameter('template.fileConfig', index, null) as FileNodeParameters | null;
-    const template = files ? getFilesData(files) : null;
+    const template = await resolveTemplate(this, index, templateNames, templateSupportedType);
     const data = this.getNodeParameter('data', index) as string;
     const dataObject = JSON.parse(data);
     if (!dataObject) {
         throw new NodeOperationError(this.getNode(), 'No data found. Please add data to the input.');
     }
     const outputFileName = this.getNodeParameter('outputFileName', index) as string;
+    const outputType = this.getNodeParameter('outputType', index) as string;
     const body: IDataObject = {
         template: template,
         files: [{
@@ -54,16 +58,11 @@ export async function execute(this: IExecuteFunctions, index: number) {
             data: dataObject,
         }],
         output: {
-            output_type: this.getNodeParameter('outputType', index) as string,
+            output_type: outputType,
             output_encoding: 'base64',
         }
     };
     const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
-    const executionData = this.helpers.constructExecutionMetaData(
-        this.helpers.returnJsonArray(responseData as IDataObject),
-        { itemData: { item: index } },
-    );
-
-    return executionData;
+    return await toNodeOutput(this, index, responseData, outputFileName, extensionForOutputType(outputType));
 }

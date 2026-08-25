@@ -1,9 +1,4 @@
-import type {
-    IDataObject,
-    IExecuteFunctions,
-    INodeProperties,
-} from 'n8n-workflow';
-
+import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { updateDisplayOptions } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
@@ -17,20 +12,12 @@ const fileNames = fileFieldNames();
 export const properties: INodeProperties[] = [
     ...getFileFields(fileNames, supportedTypes),
     {
-        displayName: 'Read Password',
-        name: 'read_password',
-        description: 'Password required to open the PDF (leave empty to skip)',
+        displayName: 'Attachment Name',
+        name: 'attachmentName',
         type: 'string',
-        typeOptions: { password: true },
         default: '',
-    },
-    {
-        displayName: 'Modify Password',
-        name: 'modify_password',
-        description: 'Password required to edit the PDF (leave empty to skip)',
-        type: 'string',
-        typeOptions: { password: true },
-        default: '',
+        placeholder: 'e.g. invoice.xml',
+        description: 'Return only this attachment. Leave empty to return every attachment, which comes back as a zip when there is more than one.',
     },
     outputFileNameDesc,
     outputBinaryPropertyDesc,
@@ -38,16 +25,16 @@ export const properties: INodeProperties[] = [
 
 const displayOptions = {
     show: {
-        resource: ['protectDocument'],
-        operation: ['protectPDF'],
+        resource: ['pdfOperations'],
+        operation: ['extractPDFAttachments'],
     },
 };
 
 export const description = updateDisplayOptions(displayOptions, properties);
+
 export async function execute(this: IExecuteFunctions, index: number) {
-    const readPassword = this.getNodeParameter('read_password', index) as string;
-    const modifyPassword = this.getNodeParameter('modify_password', index) as string;
     const template = await resolveTemplate(this, index, fileNames, supportedTypes);
+    const attachmentName = this.getNodeParameter('attachmentName', index, '') as string;
     const outputFileName = this.getNodeParameter('outputFileName', index) as string;
 
     const body: IDataObject = {
@@ -57,14 +44,14 @@ export async function execute(this: IExecuteFunctions, index: number) {
             data: [],
         }],
         output: {
-            output_type: 'pdf',
+            output_type: 'get_attachments',
             output_encoding: 'base64',
-            output_read_password: readPassword,
-            output_modify_password: modifyPassword,
-        }
+            ...(attachmentName && { output_attachment_name: attachmentName }),
+        },
     };
 
     const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
-    return await toNodeOutput(this, index, responseData, outputFileName, 'pdf');
+    // one attachment comes back as itself, several as a zip
+    return await toNodeOutput(this, index, responseData, outputFileName, 'zip');
 }

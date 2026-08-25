@@ -4,31 +4,22 @@ import type {
     INodeProperties,
 } from 'n8n-workflow';
 
-import {
-    updateDisplayOptions,
-    NodeOperationError,
-} from 'n8n-workflow';
+import { updateDisplayOptions } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
-import { getFileDesc, getFilesData, type FileNodeParameters } from '../../utils/file_utils';
+import { outputBinaryPropertyDesc, outputFileNameDesc } from '../../descriptions/common.description';
+import { fileFieldNames, getFileFields, resolveFile } from '../../utils/file_utils';
+import { toNodeOutput } from '../../utils/output_utils';
+
+const supportedTypes = ['pdf'];
+const file1Names = fileFieldNames('compareFile1');
+const file2Names = fileFieldNames('compareFile2');
 
 export const properties: INodeProperties[] = [
-    getFileDesc(
-        'compare_file1',
-        'PDF File - 1',
-        'Select PDF File - 1',
-        false,
-        true,
-        ['pdf'],
-    ),
-    getFileDesc(
-        'compare_file2',
-        'PDF File - 2',
-        'Select PDF File - 2',
-        false,
-        true,
-        ['pdf'],
-    ),
+    ...getFileFields(file1Names, supportedTypes, 'PDF 1'),
+    ...getFileFields(file2Names, supportedTypes, 'PDF 2'),
+    outputFileNameDesc,
+    outputBinaryPropertyDesc,
 ];
 
 const displayOptions = {
@@ -40,20 +31,15 @@ const displayOptions = {
 
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
-    const file1 = this.getNodeParameter('compare_file1.fileConfig', index, null) as FileNodeParameters | null;
-    const file2 = this.getNodeParameter('compare_file2.fileConfig', index, null) as FileNodeParameters | null;
-    if (!file1 || !file2) {
-        throw new NodeOperationError(this.getNode(), 'Both PDF files are required. Please add both files to the input.');
-    }
-
-    const filesData1 = getFilesData(file1, 'compare') as unknown as IDataObject[];
-    const filesData2 = getFilesData(file2, 'compare') as unknown as IDataObject[];
+    const file1 = await resolveFile(this, index, file1Names, supportedTypes, 'file_1');
+    const file2 = await resolveFile(this, index, file2Names, supportedTypes, 'file_2');
+    const outputFileName = this.getNodeParameter('outputFileName', index) as string;
 
     const body: IDataObject = {
-        compare_files: [filesData1[0], filesData2[0]],
+        compare_files: [file1, file2],
         template: null,
         files: [{
-            filename: 'output.pdf',
+            filename: outputFileName,
             data: [],
         }],
         output: {
@@ -64,11 +50,5 @@ export async function execute(this: IExecuteFunctions, index: number) {
 
     const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
-    const executionData = this.helpers.constructExecutionMetaData(
-
-        this.helpers.returnJsonArray(responseData as IDataObject),
-        { itemData: { item: index } },
-    );
-
-    return executionData;
+    return await toNodeOutput(this, index, responseData, outputFileName, 'pdf');
 }

@@ -1,9 +1,4 @@
-import type {
-    IDataObject,
-    IExecuteFunctions,
-    INodeProperties,
-} from 'n8n-workflow';
-
+import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { updateDisplayOptions } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
@@ -17,20 +12,13 @@ const fileNames = fileFieldNames();
 export const properties: INodeProperties[] = [
     ...getFileFields(fileNames, supportedTypes),
     {
-        displayName: 'Read Password',
-        name: 'read_password',
-        description: 'Password required to open the PDF (leave empty to skip)',
-        type: 'string',
-        typeOptions: { password: true },
-        default: '',
-    },
-    {
-        displayName: 'Modify Password',
-        name: 'modify_password',
-        description: 'Password required to edit the PDF (leave empty to skip)',
-        type: 'string',
-        typeOptions: { password: true },
-        default: '',
+        displayName: 'Resolution in DPI',
+        name: 'imageResolution',
+        type: 'number',
+        default: 300,
+        required: true,
+        typeOptions: { minValue: 1, maxValue: 1200 },
+        description: 'Dots per inch the pages are rendered at. Higher means sharper and larger.',
     },
     outputFileNameDesc,
     outputBinaryPropertyDesc,
@@ -38,16 +26,16 @@ export const properties: INodeProperties[] = [
 
 const displayOptions = {
     show: {
-        resource: ['protectDocument'],
-        operation: ['protectPDF'],
+        resource: ['pdfOperations'],
+        operation: ['pdfToImage'],
     },
 };
 
 export const description = updateDisplayOptions(displayOptions, properties);
+
 export async function execute(this: IExecuteFunctions, index: number) {
-    const readPassword = this.getNodeParameter('read_password', index) as string;
-    const modifyPassword = this.getNodeParameter('modify_password', index) as string;
     const template = await resolveTemplate(this, index, fileNames, supportedTypes);
+    const imageResolution = this.getNodeParameter('imageResolution', index) as number;
     const outputFileName = this.getNodeParameter('outputFileName', index) as string;
 
     const body: IDataObject = {
@@ -57,14 +45,15 @@ export async function execute(this: IExecuteFunctions, index: number) {
             data: [],
         }],
         output: {
-            output_type: 'pdf',
+            output_type: 'jpeg',
             output_encoding: 'base64',
-            output_read_password: readPassword,
-            output_modify_password: modifyPassword,
-        }
+            // the only knob the pdf -> jpeg converter takes; there is no quality setting
+            output_image_resolution: imageResolution,
+        },
     };
 
     const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
-    return await toNodeOutput(this, index, responseData, outputFileName, 'pdf');
+    // a one page PDF returns the image itself, more pages return a zip of them
+    return await toNodeOutput(this, index, responseData, outputFileName, 'jpeg');
 }
