@@ -16,8 +16,8 @@ const file1Names = fileFieldNames('compareFile1');
 const file2Names = fileFieldNames('compareFile2');
 
 export const properties: INodeProperties[] = [
-    ...getFileFields(file1Names, supportedTypes, 'PDF 1'),
-    ...getFileFields(file2Names, supportedTypes, 'PDF 2'),
+    ...getFileFields(file1Names, supportedTypes, 'Original PDF'),
+    ...getFileFields(file2Names, supportedTypes, 'Changed PDF'),
     outputFileNameDesc,
     outputBinaryPropertyDesc,
 ];

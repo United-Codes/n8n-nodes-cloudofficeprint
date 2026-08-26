@@ -3,21 +3,21 @@ import { updateDisplayOptions } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
 import { outputBinaryPropertyDesc, outputFileNameDesc } from '../../descriptions/common.description';
-import { fileFieldNames, getFileFields, pdfTemplateSources, resolveTemplate } from '../../utils/file_utils';
+import { fileFieldNames, getFileFields, resolveTemplate } from '../../utils/file_utils';
 import { toNodeOutput } from '../../utils/output_utils';
 
 const supportedTypes = ['pdf'];
 const fileNames = fileFieldNames();
 
 export const properties: INodeProperties[] = [
-    ...getFileFields(fileNames, supportedTypes, '', pdfTemplateSources),
+    ...getFileFields(fileNames, supportedTypes),
     {
         displayName: 'Attachment Name',
         name: 'attachmentName',
         type: 'string',
         default: '',
         placeholder: 'e.g. invoice.xml',
-        description: 'Return only this attachment. Leave empty to return every attachment, which comes back as a zip when there is more than one.',
+        description: 'Name of the single attachment to return. Leave empty to get them all - one attachment comes back on its own, several come back together as a zip. See <a href="https://www.apexofficeprint.com/docs/pdf-operations/pdf-attachements/">PDF attachments</a>.',
     },
     outputFileNameDesc,
     outputBinaryPropertyDesc,
@@ -33,7 +33,7 @@ const displayOptions = {
 export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions, index: number) {
-    const template = await resolveTemplate(this, index, fileNames, supportedTypes, pdfTemplateSources);
+    const template = await resolveTemplate(this, index, fileNames, supportedTypes);
     const attachmentName = this.getNodeParameter('attachmentName', index, '') as string;
     const outputFileName = this.getNodeParameter('outputFileName', index) as string;
 

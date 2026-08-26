@@ -3,20 +3,20 @@ import { updateDisplayOptions, NodeOperationError } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
 import { outputBinaryPropertyDesc, outputFileNameDesc } from '../../descriptions/common.description';
-import { fileFieldNames, getFileFields, pdfTemplateSources, resolveTemplate } from '../../utils/file_utils';
+import { fileFieldNames, getFileFields, resolveTemplate } from '../../utils/file_utils';
 import { toNodeOutput } from '../../utils/output_utils';
 
 const supportedTypes = ['pdf'];
 const fileNames = fileFieldNames();
 
 export const properties: INodeProperties[] = [
-    ...getFileFields(fileNames, supportedTypes, '', pdfTemplateSources),
+    ...getFileFields(fileNames, supportedTypes),
     {
         displayName: 'Identify Field Names',
         name: 'identifyFormFields',
         type: 'boolean',
         default: false,
-        description: 'Whether to write each field\'s own name into it instead of filling values, so you can see what the fields are called. Run this once, then fill in the names it shows.',
+        description: 'Whether to write each field\'s own name into it instead of filling values. Turn this on, run the operation once and open the result to read the names, then turn it off and use those names in Form Data.',
     },
     {
         displayName: 'Form Data (JSON)',
@@ -25,8 +25,8 @@ export const properties: INodeProperties[] = [
         default: '{}',
         required: true,
         placeholder: '{ "first_name": "John", "agree": true }',
-        description: 'Field names and the values to fill in. Text fields take strings, checkboxes true or false, and radio buttons the value of the chosen option. Give an array when several fields share one name, e.g. { "agree": [true, false] }.',
-        hint: 'Turn on Identify Field Names once to find out what the fields are called',
+        description: 'The name of each field in the PDF and the value to put in it. Text fields take a string, checkboxes true or false, radio buttons the value of the chosen option. When several fields share one name, give an array - <code>{ "agree": [true, false] }</code>. See <a href="https://www.apexofficeprint.com/docs/pdf-operations/pdf-forms/#filling-pdf-forms">filling PDF forms</a>.',
+        hint: 'Turn on Identify Field Names above and run once to find out what the fields are called',
         displayOptions: { show: { identifyFormFields: [false] } },
     },
     {
@@ -37,12 +37,12 @@ export const properties: INodeProperties[] = [
         description: 'Whether to lock the fields so the filled values can no longer be edited',
     },
     {
-        displayName: 'Font',
+        displayName: 'Fill Font',
         name: 'formFillFont',
         type: 'string',
         default: '',
         placeholder: 'e.g. ArialBlack',
-        description: 'Font used for the filled values, as a font name or a font file the server has. Leave empty to let Cloud Office Print decide; it falls back to Arial when the font is not found.',
+        description: 'Font for the values being written in, as a font name or the name of a font file the server has. Leave empty to keep whatever the form itself specifies. Falls back to Arial when the font cannot be found.',
     },
     outputFileNameDesc,
     outputBinaryPropertyDesc,
@@ -58,7 +58,7 @@ const displayOptions = {
 export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions, index: number) {
-    const template = await resolveTemplate(this, index, fileNames, supportedTypes, pdfTemplateSources);
+    const template = await resolveTemplate(this, index, fileNames, supportedTypes);
     const identifyFormFields = this.getNodeParameter('identifyFormFields', index) as boolean;
     const lockForm = this.getNodeParameter('lockForm', index) as boolean;
     const formFillFont = this.getNodeParameter('formFillFont', index, '') as string;

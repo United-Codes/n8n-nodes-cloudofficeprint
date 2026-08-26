@@ -23,27 +23,27 @@ export const properties: INodeProperties[] = [
     {
         displayName: 'Watermark Text',
         name: 'watermark_text',
-        description: 'Text placed diagonally across every page',
+        description: 'Words stamped diagonally across every page of the result',
         placeholder: 'e.g. CONFIDENTIAL',
         type: 'string',
         default: '',
     }, {
         displayName: 'Watermark Color',
         name: 'watermark_color',
-        description: 'Color of the watermark text',
+        description: 'Color of the stamped text. A light grey stays readable underneath.',
         type: 'color',
         default: '#D3D3D3 ',
     }, {
         displayName: 'Watermark Font',
         name: 'watermark_font',
-        description: 'Font of the watermark text',
+        description: 'Font of the stamped text. The server falls back to Arial if it does not have this one.',
         type: 'string',
         default: 'Arial',
     },
     {
         displayName: 'Watermark Opacity in %',
         name: 'watermark_opacity',
-        description: 'Opacity of the watermark text (0-100)',
+        description: 'How solid the stamp is, from 0 for invisible to 100 for fully opaque',
         type: 'number',
         typeOptions: {
             minValue: 0,
@@ -54,7 +54,7 @@ export const properties: INodeProperties[] = [
     {
         displayName: 'Watermark Size',
         name: 'watermark_size',
-        description: 'Size of the watermark text (in px)',
+        description: 'Height of the stamped text in pixels',
         type: 'number',
         typeOptions: {
             minValue: 1,

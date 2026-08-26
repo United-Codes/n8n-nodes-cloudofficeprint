@@ -14,7 +14,7 @@ export const properties: INodeProperties[] = [
     getFileCollectionDesc(
         'file',
         'Files',
-        'Files to merge (supports multiple files)',
+        'Files to join into one PDF, in the order listed. Click Add Files once per file; each picks its own source, so a link and an uploaded file can be merged together. Office files and images are converted on the way in.',
         appendPrependFileSupportedType,
     ),
     outputFileNameDesc,

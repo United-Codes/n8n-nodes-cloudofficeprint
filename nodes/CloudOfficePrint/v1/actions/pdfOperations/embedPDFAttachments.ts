@@ -8,7 +8,6 @@ import {
     fileFieldNames,
     getFileCollectionDesc,
     getFileFields,
-    pdfTemplateSources,
     resolveFileList,
     resolveTemplate,
 } from '../../utils/file_utils';
@@ -20,11 +19,11 @@ const pdfNames = fileFieldNames('pdf');
 const attachmentSources: FileSource[] = ['binary', 'base64'];
 
 export const properties: INodeProperties[] = [
-    ...getFileFields(pdfNames, supportedTypes, 'PDF', pdfTemplateSources),
+    ...getFileFields(pdfNames, supportedTypes, 'PDF'),
     getFileCollectionDesc(
         'attachment',
         'Attachments',
-        'Files to embed in the PDF (supports multiple files)',
+        'Files to attach inside the PDF. Click Add Attachments once per file; each picks its own source. Attachments cannot come from a URL - the server does not fetch them.',
         appendPrependFileSupportedType,
         attachmentSources,
     ),
@@ -42,7 +41,7 @@ const displayOptions = {
 export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions, index: number) {
-    const template = await resolveTemplate(this, index, pdfNames, supportedTypes, pdfTemplateSources);
+    const template = await resolveTemplate(this, index, pdfNames, supportedTypes);
 
     const entries = this.getNodeParameter('attachment.fileConfig', index, null) as IDataObject[] | null;
     if (!entries || entries.length === 0) {

@@ -81,21 +81,12 @@ export const supportedOutputTypeBasedOnTemplate: { [key in keyof typeof supporte
     "xml": ["xml"]
 }
 
-/**
- * Template types the server accepts behind a URL. Mirrors the validTemplateUrl
- * regex in apexrnd-utils, which notably has no pdf.
- */
-export const templateUrlSupportedType = ["docx", "docm", "pptm", "pptx", "xlsm", "xlsx", "csv", "txt", "html", "md", "ics", "xml"];
-
 export const appendPrependFileSupportedType = ["pdf", "docx", "docm", "xlsx", "pptx", "pptm", "html", "md", "txt", "gif", "jpeg", "jpg", "png", "svg", "webp", "bmp", "msbmp", "doc", "ppt", "xls", "odt", "ods", "odp", "eml", "msg", "csv", "heic", "avif"]
 export const templateSupportedType = ["docx", "docm", "xlsx", "xlsm", "pptx", "pptm", "html", "md", "txt", "csv", "pdf", "ics", "ifb", "xml"];
 export const subtemplatesSupportedType = ["docx", "pptx"];
 
 /** Sources a file slot offers unless the operation narrows them. */
 export const allFileSources: FileSource[] = ['binary', 'url', 'base64'];
-
-/** For a slot whose file becomes a PDF template: the server rejects a pdf URL. */
-export const pdfTemplateSources: FileSource[] = ['binary', 'base64'];
 
 /** Canonical inner names, or prefixed names when a node shows more than one slot. */
 export function fileFieldNames(prefix = ''): FileFieldNames {
@@ -298,9 +289,6 @@ async function locate(
             if (!url) {
                 throw new NodeOperationError(ctx.getNode(), 'No URL given. Enter the URL the Cloud Office Print server should download the file from.', { itemIndex: index });
             }
-            if (!/^https?:\/\//i.test(url)) {
-                throw new NodeOperationError(ctx.getNode(), `Invalid URL: ${url}. It must start with http:// or https://.`, { itemIndex: index });
-            }
             return { source, extension, filename: url };
         }
         case 'base64': {
@@ -327,13 +315,6 @@ export async function resolveTemplate(
     const located = await locate(ctx, index, values, allowedTypes, 'template', allowedSources);
 
     if (located.source === 'url') {
-        if (!templateUrlSupportedType.includes(located.extension)) {
-            throw new NodeOperationError(
-                ctx.getNode(),
-                `A ${located.extension} template cannot be given as a URL. Use an input binary field or Base64 instead. Types allowed behind a URL: ${templateUrlSupportedType.join(', ')}.`,
-                { itemIndex: index },
-            );
-        }
         return {
             template_type: located.extension,
             url: located.filename,

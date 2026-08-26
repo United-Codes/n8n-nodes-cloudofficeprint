@@ -17,9 +17,9 @@ const fileNames = fileFieldNames();
 export const properties: INodeProperties[] = [
     ...getFileFields(fileNames, supportedTypes),
     {
-        displayName: 'Password',
+        displayName: 'Open Password',
         name: 'read_password',
-        description: 'Password required to open the document',
+        description: 'Password needed to open the document. Word, Excel and PowerPoint encrypt the whole file, so without it the contents cannot be read at all.',
         type: 'string',
         typeOptions: { password: true },
         default: '',
