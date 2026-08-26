@@ -5,6 +5,7 @@ import * as mergeToPDF from './mergeToPDF';
 import * as compressPDF from './compressPDF';
 import * as splitPDF from './splitPDF';
 import * as fillPDFForm from './fillPDFForm';
+import * as createPDFForm from './createPDFForm';
 import * as pdfToImage from './pdfToImage';
 import * as embedPDFAttachments from './embedPDFAttachments';
 import * as extractPDFAttachments from './extractPDFAttachments';
@@ -16,6 +17,7 @@ export {
     compressPDF,
     splitPDF,
     fillPDFForm,
+    createPDFForm,
     pdfToImage,
     embedPDFAttachments,
     extractPDFAttachments,
@@ -46,6 +48,12 @@ export const description: INodeProperties[] = [
                 action: "Convert to PDF"
             },
             {
+                name: 'Create PDF Form',
+                value: 'createPDFForm',
+                description: 'Build a fillable PDF from a Word template that contains {?form ...} tags',
+                action: 'Create a PDF form',
+            },
+            {
                 name: 'Embed Attachments in PDF',
                 value: 'embedPDFAttachments',
                 description: 'Attach one or more files inside a PDF',
@@ -60,7 +68,7 @@ export const description: INodeProperties[] = [
             {
                 name: 'Fill PDF Form',
                 value: 'fillPDFForm',
-                description: 'Fill in the form fields of a PDF and optionally flatten it',
+                description: 'Fill in the form fields of an existing PDF and optionally flatten it',
                 action: 'Fill a PDF form',
             },
             {
@@ -96,6 +104,7 @@ export const description: INodeProperties[] = [
     ...compressPDF.description,
     ...splitPDF.description,
     ...fillPDFForm.description,
+    ...createPDFForm.description,
     ...pdfToImage.description,
     ...embedPDFAttachments.description,
     ...extractPDFAttachments.description,

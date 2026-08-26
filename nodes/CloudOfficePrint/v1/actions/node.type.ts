@@ -9,6 +9,7 @@ type NodeMap = {
 		| 'compressPDF'
 		| 'splitPDF'
 		| 'fillPDFForm'
+		| 'createPDFForm'
 		| 'pdfToImage'
 		| 'embedPDFAttachments'
 		| 'extractPDFAttachments';

@@ -15,10 +15,10 @@ export type ResolvedFile =
     | { file_source: 'base64'; file_content: string; mime_type: string; filename: string }
     | { file_source: 'url'; file_url: string; mime_type: string; filename: string };
 
-/** The template object. */
+/** The template object. A URL template uses `url`; `file_source` is never read here. */
 export type ResolvedTemplate =
     | { template_type: string; filename: string; file: string }
-    | { template_type: string; filename: string; file_source: 'url' };
+    | { template_type: string; url: string };
 
 /** Raw parameter values for one file slot, keyed by the collection's inner names. */
 export type FileValues = {
@@ -81,12 +81,21 @@ export const supportedOutputTypeBasedOnTemplate: { [key in keyof typeof supporte
     "xml": ["xml"]
 }
 
+/**
+ * Template types the server accepts behind a URL. Mirrors the validTemplateUrl
+ * regex in apexrnd-utils, which notably has no pdf.
+ */
+export const templateUrlSupportedType = ["docx", "docm", "pptm", "pptx", "xlsm", "xlsx", "csv", "txt", "html", "md", "ics", "xml"];
+
 export const appendPrependFileSupportedType = ["pdf", "docx", "docm", "xlsx", "pptx", "pptm", "html", "md", "txt", "gif", "jpeg", "jpg", "png", "svg", "webp", "bmp", "msbmp", "doc", "ppt", "xls", "odt", "ods", "odp", "eml", "msg", "csv", "heic", "avif"]
 export const templateSupportedType = ["docx", "docm", "xlsx", "xlsm", "pptx", "pptm", "html", "md", "txt", "csv", "pdf", "ics", "ifb", "xml"];
 export const subtemplatesSupportedType = ["docx", "pptx"];
 
 /** Sources a file slot offers unless the operation narrows them. */
 export const allFileSources: FileSource[] = ['binary', 'url', 'base64'];
+
+/** For a slot whose file becomes a PDF template: the server rejects a pdf URL. */
+export const pdfTemplateSources: FileSource[] = ['binary', 'base64'];
 
 /** Canonical inner names, or prefixed names when a node shows more than one slot. */
 export function fileFieldNames(prefix = ''): FileFieldNames {
@@ -312,15 +321,22 @@ export async function resolveTemplate(
     index: number,
     names: FileFieldNames,
     allowedTypes: string[],
+    allowedSources: FileSource[] = allFileSources,
 ): Promise<ResolvedTemplate> {
     const values = readFileValues(ctx, index, names);
-    const located = await locate(ctx, index, values, allowedTypes, 'template');
+    const located = await locate(ctx, index, values, allowedTypes, 'template', allowedSources);
 
     if (located.source === 'url') {
+        if (!templateUrlSupportedType.includes(located.extension)) {
+            throw new NodeOperationError(
+                ctx.getNode(),
+                `A ${located.extension} template cannot be given as a URL. Use an input binary field or Base64 instead. Types allowed behind a URL: ${templateUrlSupportedType.join(', ')}.`,
+                { itemIndex: index },
+            );
+        }
         return {
             template_type: located.extension,
-            filename: located.filename,
-            file_source: 'url',
+            url: located.filename,
         };
     }
 

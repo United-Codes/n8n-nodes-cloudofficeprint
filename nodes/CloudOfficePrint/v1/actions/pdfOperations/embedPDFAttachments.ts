@@ -8,6 +8,7 @@ import {
     fileFieldNames,
     getFileCollectionDesc,
     getFileFields,
+    pdfTemplateSources,
     resolveFileList,
     resolveTemplate,
 } from '../../utils/file_utils';
@@ -16,12 +17,10 @@ import { toNodeOutput } from '../../utils/output_utils';
 
 const supportedTypes = ['pdf'];
 const pdfNames = fileFieldNames('pdf');
-// the API never fetches an attachment: `attachments` is left out of loadAllFileData
-// and handed to pdfbox.embedFiles as-is, which reads file_content only
 const attachmentSources: FileSource[] = ['binary', 'base64'];
 
 export const properties: INodeProperties[] = [
-    ...getFileFields(pdfNames, supportedTypes, 'PDF'),
+    ...getFileFields(pdfNames, supportedTypes, 'PDF', pdfTemplateSources),
     getFileCollectionDesc(
         'attachment',
         'Attachments',
@@ -43,7 +42,7 @@ const displayOptions = {
 export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions, index: number) {
-    const template = await resolveTemplate(this, index, pdfNames, supportedTypes);
+    const template = await resolveTemplate(this, index, pdfNames, supportedTypes, pdfTemplateSources);
 
     const entries = this.getNodeParameter('attachment.fileConfig', index, null) as IDataObject[] | null;
     if (!entries || entries.length === 0) {
