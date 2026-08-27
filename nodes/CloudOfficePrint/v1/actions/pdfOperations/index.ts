@@ -5,6 +5,7 @@ import * as splitPDF from './splitPDF';
 import * as compressPDF from './compressPDF';
 import * as watermarkPDF from './watermarkPDF';
 import * as pdfToImage from './pdfToImage';
+import * as readPDFFormFields from './readPDFFormFields';
 import * as fillPDFForm from './fillPDFForm';
 import * as createPDFForm from './createPDFForm';
 import * as extractPDFAttachments from './extractPDFAttachments';
@@ -17,6 +18,7 @@ export {
     compressPDF,
     watermarkPDF,
     pdfToImage,
+    readPDFFormFields,
     fillPDFForm,
     createPDFForm,
     extractPDFAttachments,
@@ -75,6 +77,12 @@ export const description: INodeProperties[] = [
                 action: 'Convert a PDF to images',
             },
             {
+                name: 'Read PDF Form Fields',
+                value: 'readPDFFormFields',
+                description: 'List the fields of a PDF form with their values, or mark their names onto the PDF',
+                action: 'Read the fields of a PDF form',
+            },
+            {
                 name: 'Fill PDF Form',
                 value: 'fillPDFForm',
                 description: 'Fill in the form fields of an existing PDF and optionally flatten it',
@@ -107,6 +115,7 @@ export const description: INodeProperties[] = [
     ...compressPDF.description,
     ...watermarkPDF.description,
     ...pdfToImage.description,
+    ...readPDFFormFields.description,
     ...fillPDFForm.description,
     ...createPDFForm.description,
     ...extractPDFAttachments.description,

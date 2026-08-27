@@ -8,6 +8,7 @@ type NodeMap = {
 		| 'mergeToPDF'
 		| 'compressPDF'
 		| 'splitPDF'
+		| 'readPDFFormFields'
 		| 'fillPDFForm'
 		| 'createPDFForm'
 		| 'pdfToImage'

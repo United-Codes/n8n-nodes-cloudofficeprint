@@ -14,13 +14,16 @@ export const properties: INodeProperties[] = [
     ...getFileFields(templateNames, supportedTypes, 'Template'),
     {
         displayName: 'Data (JSON)',
-        name: 'formData',
+        // deliberately not 'formData': Fill PDF Form uses that name for values, and
+        // n8n stores parameters in one flat object per node, so a shared name would
+        // carry field definitions into the other operation
+        name: 'formFieldData',
         type: 'json',
         default: '{}',
         required: true,
         placeholder: '{ "first_name": { "type": "text", "name": "first_name", "value": "John" } }',
         description: 'Values for the tags in the template, keyed by tag name. A <code>{?form name}</code> tag takes an object describing the field to build there, with "type" and "name" required. Ordinary tags take their usual values, so one template can mix form fields with normal text, images and loops. See <a href="https://www.apexofficeprint.com/docs/pdf-operations/pdf-forms/">PDF forms</a>.',
-        hint: 'Types: text, password, checkbox, radio, dropdown, combobox, listbox, pushbutton. All accept width, height and lock.',
+        hint: 'Types: text, password, checkbox, radio, dropdown, combobox, listbox, pushbutton. All accept width, height and lock. A checkbox value can be true/false or 1/0.',
     },
     {
         displayName: 'Flatten the Form',
@@ -44,7 +47,7 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions, index: number) {
     const template = await resolveTemplate(this, index, templateNames, supportedTypes);
-    const formData = this.getNodeParameter('formData', index) as string;
+    const formData = this.getNodeParameter('formFieldData', index) as string;
 
     let formDataObject: IDataObject;
     try {
@@ -69,7 +72,7 @@ export async function execute(this: IExecuteFunctions, index: number) {
         output: {
             output_type: 'pdf',
             output_encoding: 'base64',
-            lock_form: lockForm,
+            ...(lockForm && { lock_form: true }),
         },
     };
 

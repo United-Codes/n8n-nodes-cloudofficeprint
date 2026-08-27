@@ -12,22 +12,14 @@ const fileNames = fileFieldNames();
 export const properties: INodeProperties[] = [
     ...getFileFields(fileNames, supportedTypes),
     {
-        displayName: 'Identify Field Names',
-        name: 'identifyFormFields',
-        type: 'boolean',
-        default: false,
-        description: 'Whether to write each field\'s own name into it instead of filling values. Turn this on, run the operation once and open the result to read the names, then turn it off and use those names in Form Data.',
-    },
-    {
-        displayName: 'Form Data (JSON)',
+        displayName: 'Data (JSON)',
         name: 'formData',
         type: 'json',
-        default: '{}',
+        default: '{\n  "aop_pdf_form_data": [{}]\n}',
         required: true,
-        placeholder: '{ "first_name": "John", "agree": true }',
-        description: 'The name of each field in the PDF and the value to put in it. Text fields take a string, checkboxes true or false, radio buttons the value of the chosen option. When several fields share one name, give an array - <code>{ "agree": [true, false] }</code>. See <a href="https://www.apexofficeprint.com/docs/pdf-operations/pdf-forms/#filling-pdf-forms">filling PDF forms</a>.',
-        hint: 'Turn on Identify Field Names above and run once to find out what the fields are called',
-        displayOptions: { show: { identifyFormFields: [false] } },
+        placeholder: '{ "aop_pdf_form_data": [{ "first_name": "John", "agree": true }] }',
+        description: 'Data for the file, exactly as Cloud Office Print receives it. Put the field names and values inside <code>aop_pdf_form_data</code>: text fields take a string, checkboxes true or false, radio buttons the value of the chosen option. When several fields share one name, give an array - <code>{ "agree": [true, false] }</code>. See <a href="https://www.apexofficeprint.com/docs/pdf-operations/pdf-forms/#filling-pdf-forms">filling PDF forms</a>.',
+        hint: 'Run the Read PDF Form Fields operation on this PDF to find out what the fields are called',
     },
     {
         displayName: 'Flatten the Form',
@@ -59,38 +51,62 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions, index: number) {
     const template = await resolveTemplate(this, index, fileNames, supportedTypes);
-    const identifyFormFields = this.getNodeParameter('identifyFormFields', index) as boolean;
     const lockForm = this.getNodeParameter('lockForm', index) as boolean;
     const formFillFont = this.getNodeParameter('formFillFont', index, '') as string;
     const outputFileName = this.getNodeParameter('outputFileName', index) as string;
+    const formData = this.getNodeParameter('formData', index) as string;
 
-    let data: IDataObject = {};
-    if (!identifyFormFields) {
-        const formData = this.getNodeParameter('formData', index) as string;
-        let formDataObject: IDataObject;
-        try {
-            formDataObject = JSON.parse(formData) as IDataObject;
-        } catch {
-            throw new NodeOperationError(this.getNode(), 'Form Data (JSON) is not valid JSON', { itemIndex: index });
-        }
-        if (!formDataObject || typeof formDataObject !== 'object' || Array.isArray(formDataObject)) {
-            throw new NodeOperationError(this.getNode(), 'Form Data (JSON) must be an object of field names and values', { itemIndex: index });
-        }
-        // the server reads the values from this key inside the file's data
-        data = { aop_pdf_form_data: formDataObject };
+    let dataObject: IDataObject;
+    try {
+        dataObject = JSON.parse(formData) as IDataObject;
+    } catch {
+        throw new NodeOperationError(this.getNode(), 'Data (JSON) is not valid JSON', { itemIndex: index });
+    }
+    if (!dataObject || typeof dataObject !== 'object' || Array.isArray(dataObject)) {
+        throw new NodeOperationError(this.getNode(), 'Data (JSON) must be an object holding an "aop_pdf_form_data" key', { itemIndex: index });
+    }
+
+    // the server reads the values from this one key, so without it nothing is filled
+    const wrapped = dataObject.aop_pdf_form_data ?? dataObject.AOP_PDF_FORM_DATA;
+    if (wrapped === undefined) {
+        throw new NodeOperationError(
+            this.getNode(),
+            'Data (JSON) has no "aop_pdf_form_data" key, so no field would be filled. Wrap the field names and values in it: { "aop_pdf_form_data": [{ "first_name": "John" }] }.',
+            { itemIndex: index },
+        );
+    }
+    const fields = (Array.isArray(wrapped) ? wrapped[0] : wrapped) as IDataObject | undefined;
+    if (!fields || typeof fields !== 'object' || Array.isArray(fields)) {
+        throw new NodeOperationError(
+            this.getNode(),
+            '"aop_pdf_form_data" must be an object of field names and values, or an array holding one such object',
+            { itemIndex: index },
+        );
+    }
+
+    // a field here holds a value, never a description of a field to build - that is
+    // Create PDF Form, and its JSON pasted in here would silently fill nothing
+    const [defined] = Object.entries(fields).filter(
+        ([, value]) => value !== null && typeof value === 'object' && !Array.isArray(value),
+    );
+    if (defined) {
+        throw new NodeOperationError(
+            this.getNode(),
+            `Data (JSON) gives an object for the field "${defined[0]}", but this operation fills an existing form, so each field takes a value - a string, true/false, a number, or an array of those. To build new form fields from a Word template, use the Create PDF Form operation instead.`,
+            { itemIndex: index },
+        );
     }
 
     const body: IDataObject = {
         template,
         files: [{
             filename: outputFileName,
-            data,
+            data: dataObject,
         }],
         output: {
             output_type: 'pdf',
             output_encoding: 'base64',
-            lock_form: lockForm,
-            ...(identifyFormFields && { identify_form_fields: true }),
+            ...(lockForm && { lock_form: true }),
             ...(formFillFont && { output_form_fill_font: formFillFont }),
         },
     };
