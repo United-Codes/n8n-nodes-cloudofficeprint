@@ -75,7 +75,8 @@ export const supportedOutputTypeBasedOnTemplate: { [key in keyof typeof supporte
     "md": ["html", "onepagepdf", "pdf", "md", "count_tags"],
     "txt": ["onepagepdf", "pdf", "txt", "count_tags"],
     "csv": ["onepagepdf", "pdf", "txt", "count_tags", "meta_data", "xlsx", "csv"],
-    "pdf": ["jpeg", "pdf", "form_fields", "xfa_form_fields", "get_attachments", "validate_pdf"],
+    // jpeg, form fields and attachments have their own operations under PDF Operation
+    "pdf": ["pdf"],
     "ics": ["ics"],
     "ifb": ["ifb"],
     "xml": ["xml"]
