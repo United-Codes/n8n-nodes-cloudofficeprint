@@ -63,15 +63,13 @@ function parseJsonBody(body: unknown): IDataObject {
 }
 
 /**
- * Turns a Cloud Office Print response into node output: a binary item for files,
- * a JSON item for data output types and for Debug Mode.
+ * Turns a response into node output: a binary item for files, a JSON item for the
+ * data output types and for Debug Mode. The body is Base64 because the request asks
+ * for it and the transport leaves it unparsed.
  *
- * The response body is Base64 because the request asks for `output_encoding:
- * base64`, and the transport keeps it unparsed.
- *
- * `extension` is what the operation asked for. Operations that can return either
- * one file or a zip of them - split, PDF to image, extract attachments - get the
- * real extension from the response content type instead.
+ * `extension` is what the operation asked for; the response content type wins when
+ * it names a known type, since split, PDF to image and extract attachments each
+ * return either one file or a zip of them.
  */
 export async function toNodeOutput(
     ctx: IExecuteFunctions,

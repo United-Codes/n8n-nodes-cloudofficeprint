@@ -70,8 +70,8 @@ export async function execute(this: IExecuteFunctions, index: number) {
         template,
         files: [{
             filename: outputFileName,
-            // reading a form needs no data, but the key has to be there
-            data: {},
+            // reading needs no data; an empty array also stops the server embedding tags
+            data: [],
         }],
         output: marked
             ? { output_type: 'pdf', output_encoding: 'base64', identify_form_fields: true }

@@ -12,11 +12,9 @@ import {
     templateSupportedType,
 } from '../../utils/file_utils';
 import { extensionForOutputType, toNodeOutput } from '../../utils/output_utils';
+import { getJsonObjectParameter } from '../../utils/param_utils';
 
-import {
-    updateDisplayOptions,
-    NodeOperationError,
-} from 'n8n-workflow';
+import { updateDisplayOptions } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
 import { outputBinaryPropertyDesc, outputFileNameDesc, outputTypeDesc } from '../../descriptions/common.description';
@@ -32,7 +30,7 @@ const fixedOutputTemplateTypes = templateSupportedType
     }))
     .filter((entry) => entry.outputTypes.length === 1);
 
-/** The dropdown steps aside for those, so it cannot offer a choice that does not exist. */
+/** Hide the dropdown for those, so it cannot offer a choice that does not exist. */
 const outputTypeSelect: INodeProperties = fixedOutputTemplateTypes.length
     ? {
         ...outputTypeDesc,
@@ -42,7 +40,7 @@ const outputTypeSelect: INodeProperties = fixedOutputTemplateTypes.length
     }
     : outputTypeDesc;
 
-/** In its place, one read-only field per type: the output stays visible, just not up for debate. */
+/** Show a disabled field instead, so the output type stays visible. */
 // eslint-disable-next-line n8n-nodes-base/node-param-default-missing -- default is computed
 const fixedOutputTypes: INodeProperties[] = fixedOutputTemplateTypes.map(({ templateType, outputTypes }) => ({
     displayName: 'Output Type',
@@ -83,11 +81,7 @@ const displayOptions = {
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
     const template = await resolveTemplate(this, index, templateNames, templateSupportedType);
-    const data = this.getNodeParameter('data', index) as string;
-    const dataObject = JSON.parse(data);
-    if (!dataObject) {
-        throw new NodeOperationError(this.getNode(), 'No data found. Please add data to the input.');
-    }
+    const dataObject = getJsonObjectParameter(this, index, 'data', 'Data (JSON)');
     const outputFileName = this.getNodeParameter('outputFileName', index) as string;
     const outputType = this.getNodeParameter('outputType', index) as string;
     const body: IDataObject = {

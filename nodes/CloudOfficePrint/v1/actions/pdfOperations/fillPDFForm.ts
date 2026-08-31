@@ -5,6 +5,7 @@ import { CloudOfficePrintRequest } from '../../transport';
 import { outputBinaryPropertyDesc, outputFileNameDesc } from '../../descriptions/common.description';
 import { fileFieldNames, getFileFields, resolveTemplate } from '../../utils/file_utils';
 import { toNodeOutput } from '../../utils/output_utils';
+import { getJsonObjectParameter } from '../../utils/param_utils';
 
 const supportedTypes = ['pdf'];
 const fileNames = fileFieldNames();
@@ -54,19 +55,9 @@ export async function execute(this: IExecuteFunctions, index: number) {
     const lockForm = this.getNodeParameter('lockForm', index) as boolean;
     const formFillFont = this.getNodeParameter('formFillFont', index, '') as string;
     const outputFileName = this.getNodeParameter('outputFileName', index) as string;
-    const formData = this.getNodeParameter('formData', index) as string;
+    const dataObject = getJsonObjectParameter(this, index, 'formData', 'Data (JSON)');
 
-    let dataObject: IDataObject;
-    try {
-        dataObject = JSON.parse(formData) as IDataObject;
-    } catch {
-        throw new NodeOperationError(this.getNode(), 'Data (JSON) is not valid JSON', { itemIndex: index });
-    }
-    if (!dataObject || typeof dataObject !== 'object' || Array.isArray(dataObject)) {
-        throw new NodeOperationError(this.getNode(), 'Data (JSON) must be an object holding an "aop_pdf_form_data" key', { itemIndex: index });
-    }
-
-    // the server reads the values from this one key, so without it nothing is filled
+    // the server fills from this key alone, so without it the request is a no-op
     const wrapped = dataObject.aop_pdf_form_data ?? dataObject.AOP_PDF_FORM_DATA;
     if (wrapped === undefined) {
         throw new NodeOperationError(
@@ -84,8 +75,7 @@ export async function execute(this: IExecuteFunctions, index: number) {
         );
     }
 
-    // a field here holds a value, never a description of a field to build - that is
-    // Create PDF Form, and its JSON pasted in here would silently fill nothing
+    // an object value is Create PDF Form's shape, and would fill nothing here
     const [defined] = Object.entries(fields).filter(
         ([, value]) => value !== null && typeof value === 'object' && !Array.isArray(value),
     );

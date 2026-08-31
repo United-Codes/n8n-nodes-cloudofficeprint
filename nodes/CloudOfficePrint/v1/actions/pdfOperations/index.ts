@@ -36,8 +36,7 @@ export const description: INodeProperties[] = [
                 resource: ['pdfOperations'],
             },
         },
-        // ordered by how often each one is reached for, with the merge/split,
-        // form and attachment pairs kept next to each other
+        // by how often each is used, keeping the merge/split, form and attachment pairs together
         // eslint-disable-next-line n8n-nodes-base/node-param-options-type-unsorted-items
         options: [
             {
