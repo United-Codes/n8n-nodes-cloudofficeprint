@@ -1,3 +1,4 @@
+Pr
 # Cloud Office Print Node: User Guide
 
 Generate and process documents inside n8n: feel the power of Cloud Office Print without leaving your workflow.
@@ -92,6 +93,7 @@ Notes:
 - File Type must match the actual file. Cloud Office Print does not guess it, and the field lists only the types the operation accepts. It is hidden when the operation takes a single type.
 - For Base64, paste the raw string only. No `data:...;base64,` prefix.
 - Merge to Single PDF File and Embed Attachments in PDF take a list rather than one slot: click **Add Files** or **Add Attachments** once per file, and each entry picks its own source.
+- **URL** is the cheapest option for large files, since the file is never carried through the workflow.
 
 
 ## 5. Actions and fields
@@ -110,6 +112,7 @@ Fills the tags in a template with your JSON data and exports the result.
 | --- | --- |
 | **Template** | The template. One file. Allowed: `docx`, `docm`, `xlsx`, `xlsm`, `pptx`, `pptm`, `html`, `md`, `txt`, `csv`, `pdf`, `ics`, `ifb`, `xml`. |
 | **Data (JSON)** | The data that fills the template tags. |
+| **Output File Name** | Name of the generated file, without extension. |
 | **Output Type** | The format to export to. The list changes with the template type. A `docx` template can export to `pdf`, `docx`, `html`, `txt`, and more. |
 
 Two output types return data instead of a document, as JSON on the item:
