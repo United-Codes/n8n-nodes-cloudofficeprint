@@ -1,4 +1,3 @@
-Pr
 # Cloud Office Print Node: User Guide
 
 Generate and process documents inside n8n: feel the power of Cloud Office Print without leaving your workflow.
