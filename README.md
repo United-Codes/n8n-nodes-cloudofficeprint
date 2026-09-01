@@ -2,7 +2,7 @@
 
 This is an n8n community node. It lets you use **Cloud Office Print** in your n8n workflows.
 
-Cloud Office Print generates and manipulates PDF and Office documents: fill templates with data, convert files to PDF, merge, compress and watermark PDFs, password-protect documents, and compare PDFs.
+Cloud Office Print generates and manipulates PDF and Office documents: fill a Word, Excel or PowerPoint template with data and get the Office file back, convert files to PDF, merge, split, compress and watermark PDFs, read and fill PDF forms, render pages as images, handle PDF attachments, password-protect documents, and compare PDFs.
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
@@ -48,7 +48,14 @@ npm install n8n-nodes-cloudofficeprint
 - Convert a file to PDF
 - Compress a PDF
 - Merge multiple files into a single PDF
+- Split a PDF, by page count or by text on the page
 - Add a watermark to a PDF
+- Read the fields of a PDF form, as JSON or marked onto the PDF
+- Fill in an existing PDF form and optionally flatten it
+- Build a fillable PDF form from a Word template
+- Convert the pages of a PDF to JPEG images
+- Embed attachments in a PDF
+- Extract attachments from a PDF
 
 **3. Password Protect Document**
 - Password protect an Office file
@@ -67,26 +74,25 @@ Sign up and get an API key from [Cloud Office Print](https://www.united-codes.co
 
 ## Usage
 
-Every action takes files as Base64 and returns the result as Base64. Most of a workflow is therefore converting into and out of n8n's binary format, with the Cloud Office Print node in the middle.
+Files go in as n8n binary data and come back out as n8n binary data, so the node drops straight between Google Drive, HTTP Request, Gmail, S3 or anything else that produces or consumes files.
 
 ### Giving the node a file
 
-Every action asks for the same two fields:
+Every file field asks where the file comes from:
 
-- **Base64 Encoded File** – the file content as a raw Base64 string. No `data:...;base64,` prefix.
-- **File Type** – the extension, for example `docx` or `pdf`. It must match the actual content. The field is hidden when the action accepts only one type.
+- **Input Binary Field** *(default)* – the name of the binary field on the incoming item, usually `data`. Use this when the file arrives from an earlier node.
+- **URL** – a http(s) file link. The Cloud Office Print server downloads the file itself, so it never passes through the workflow. Best for large files.
+- **Base64** – the file content as a raw Base64 string. No `data:...;base64,` prefix.
 
-**Merge to Single PDF File** takes two or more files; click **Add Files** once per file, as they are merged in the order listed. **PDF Compare** takes one file in each of its two sections. Every other action takes a single file.
+**File Type** is always required: the extension, for example `docx` or `pdf`. It must match the actual content, and the field is hidden when the action accepts only one type.
+
+**Merge to Single PDF File** takes two or more files; click **Add Files** once per file, as they are merged in the order listed. Each file picks its own source, so a file at a URL and an uploaded one can be merged together. **PDF Compare** takes one file in each of its two sections. Every other action takes a single file.
 
 ### Saving the result
 
-The node returns the whole API response, with the generated file as Base64 in `body`. To turn that back into a real file, add a **Convert to File** node, operation **Move Base64 String to File**:
+The generated file arrives as binary data in the field named by **Output Binary Field**, `data` by default, named from **Output File Name** plus the output type's extension. The item's JSON carries the file name, MIME type, size and binary field name, so a later node — or an AI Agent tool call, which never sees binary — can tell what came back. Send it straight to Google Drive, Gmail, S3, or wherever else your workflow needs it.
 
-- **Base64 Input Field**: `body`
-- **Put Output File in Field**: `data`
-- Under options, set **File Name** and **MIME Type** so the file arrives correctly named
-
-From there the binary can go to Google Drive, Gmail, S3, or wherever else your workflow needs it.
+The data-only output types on **Document Generation** — `count_tags` and `meta_data` — return JSON instead, since there is no file to hand back. To read a PDF form, use **Read PDF Form Fields**.
 
 
 ### Filling a template with data
