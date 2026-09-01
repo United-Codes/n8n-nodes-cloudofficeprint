@@ -18,7 +18,7 @@ export class CloudOfficePrint implements INodeType {
             dark: 'file:v1/cop.dark.svg',
         },
         subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-        description: 'Comprehensive document generation and PDF processing: create documents from templates, convert files to PDF, merge, compress, watermark, password protect and compare PDFs with the Cloud Office Print API',
+        description: 'Fill a Word, Excel or PowerPoint template with data and get the Office file or a PDF back. Convert, merge, split, compress and watermark PDFs, read and fill PDF forms, render pages as images, embed and extract attachments, password protect documents and compare PDFs.',
         version: 1,
         defaults: {
             name: 'Cloud Office Print',
