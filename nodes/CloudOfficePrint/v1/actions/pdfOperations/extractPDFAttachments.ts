@@ -52,6 +52,7 @@ export async function execute(this: IExecuteFunctions, index: number) {
 
     const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
-    // one attachment comes back as itself, several as a zip
+    // several attachments come back as a zip; one comes back as itself, and the
+    // response content type names it
     return await toNodeOutput(this, index, responseData, outputFileName, 'zip');
 }

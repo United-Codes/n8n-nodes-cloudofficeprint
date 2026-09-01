@@ -16,15 +16,47 @@ const outputOnlyMimeType: Record<string, string> = {
     zip: 'application/zip',
 };
 
-/** Content type of the response back to a file extension, for the types the API returns. */
+/** Content types whose extension cannot be read off the subtype. */
+const irregularMimeType: Record<string, string> = {
+    'application/x-zip-compressed': 'zip',
+};
+
+/** Content type back to a file extension, for the types the node already knows. */
 const extensionForMimeType: Record<string, string> = (() => {
-    const map: Record<string, string> = { 'application/x-zip-compressed': 'zip' };
+    const map: Record<string, string> = { ...irregularMimeType };
     for (const [extension, mime] of Object.entries({ ...supportedMimeType, ...outputOnlyMimeType })) {
         // first extension wins, so jpeg beats jpg and bmp beats msbmp
         if (!(mime in map)) map[mime] = extension;
     }
     return map;
 })();
+
+/**
+ * Drops an extension the caller is about to append again, so an Output File Name of
+ * "invoice.pdf" does not become "invoice.pdf.pdf". A name that is only the extension
+ * is left alone.
+ */
+export function withoutRedundantExtension(fileName: string, extension: string): string {
+    const suffix = `.${extension.toLowerCase()}`;
+    if (fileName.length <= suffix.length) return fileName;
+    return fileName.toLowerCase().endsWith(suffix) ? fileName.slice(0, -suffix.length) : fileName;
+}
+
+/**
+ * The file extension a response content type implies: a known type first, then the
+ * RFC 6839 structured suffix (`image/svg+xml`), then a plain subtype (`text/xml`).
+ * Undefined for types that say nothing, such as application/octet-stream.
+ */
+export function extensionForContentType(contentType: string): string | undefined {
+    const known = extensionForMimeType[contentType];
+    if (known) return known;
+
+    const subtype = contentType.split('/')[1] ?? '';
+    const suffix = subtype.split('+')[1];
+    if (suffix && /^[a-z0-9]+$/.test(suffix)) return suffix;
+
+    return /^[a-z0-9]{2,8}$/.test(subtype) ? subtype : undefined;
+}
 
 export function isJsonOutputType(outputType: string): boolean {
     return jsonOutputTypes.includes(outputType);
@@ -95,9 +127,10 @@ export async function toNodeOutput(
     const base64 = Buffer.isBuffer(body) ? body.toString('utf-8') : String(body ?? '');
     const buffer = Buffer.from(base64, 'base64');
 
-    const outputBinaryProperty = ctx.getNodeParameter('outputBinaryProperty', index, 'data') as string;
-    const actualExtension = extensionForMimeType[contentType] ?? extension;
-    const fileName = `${outputFileName}.${actualExtension}`;
+    const binaryField = (ctx.getNodeParameter('outputBinaryProperty', index, 'data') as string) || 'data';
+    // the response says what the file is; the operation only guesses
+    const actualExtension = extensionForContentType(contentType) ?? extension;
+    const fileName = `${withoutRedundantExtension(outputFileName, actualExtension)}.${actualExtension}`;
     const mimeType = contentType
         || supportedMimeType[actualExtension as keyof typeof supportedMimeType]
         || outputOnlyMimeType[actualExtension];
@@ -105,7 +138,16 @@ export async function toNodeOutput(
     const binaryData = await ctx.helpers.prepareBinaryData(buffer, fileName, mimeType);
 
     return ctx.helpers.constructExecutionMetaData(
-        [{ json: {}, binary: { [outputBinaryProperty || 'data']: binaryData } }],
+        [{
+            // the binary never reaches an AI Agent tool call, so describe it in the JSON
+            json: {
+                fileName,
+                mimeType: binaryData.mimeType,
+                fileSize: buffer.length,
+                binaryField,
+            },
+            binary: { [binaryField]: binaryData },
+        }],
         { itemData: { item: index } },
     );
 }
