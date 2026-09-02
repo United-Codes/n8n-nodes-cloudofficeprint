@@ -7,30 +7,33 @@ import type {
 import { updateDisplayOptions } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
-import { outputFileNameDesc } from '../../descriptions/common.description';
-import { getFilesData, getSingleFileDesc, getSingleFileParameters } from '../../utils/file_utils';
+import { outputBinaryPropertyDesc, outputFileNameDesc } from '../../descriptions/common.description';
+import { fileFieldNames, getFileFields, resolveTemplate } from '../../utils/file_utils';
+import { toNodeOutput } from '../../utils/output_utils';
 
 const supportedTypes = ['pdf'];
+const fileNames = fileFieldNames();
 
 export const properties: INodeProperties[] = [
-    ...getSingleFileDesc('Content of the PDF to protect, encoded as Base64', supportedTypes),
+    ...getFileFields(fileNames, supportedTypes),
     {
-        displayName: 'Read Password',
+        displayName: 'Open Password',
         name: 'read_password',
-        description: 'Password required to open the PDF (leave empty to skip)',
+        description: 'Password needed to open the PDF at all. Leave empty to let anyone open it and only restrict editing. See <a href="https://www.apexofficeprint.com/docs/pdf-operations/pdf-security/">PDF security</a>.',
         type: 'string',
         typeOptions: { password: true },
         default: '',
     },
     {
-        displayName: 'Modify Password',
+        displayName: 'Edit Password',
         name: 'modify_password',
-        description: 'Password required to edit the PDF (leave empty to skip)',
+        description: 'Password needed to change the PDF. Readers can open and print it without this; only editing is blocked. Leave empty to skip.',
         type: 'string',
         typeOptions: { password: true },
         default: '',
     },
     outputFileNameDesc,
+    outputBinaryPropertyDesc,
 ];
 
 const displayOptions = {
@@ -44,11 +47,11 @@ export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
     const readPassword = this.getNodeParameter('read_password', index) as string;
     const modifyPassword = this.getNodeParameter('modify_password', index) as string;
-    const file = getSingleFileParameters(this, index, supportedTypes);
+    const template = await resolveTemplate(this, index, fileNames, supportedTypes);
     const outputFileName = this.getNodeParameter('outputFileName', index) as string;
 
     const body: IDataObject = {
-        template: getFilesData(file),
+        template,
         files: [{
             filename: outputFileName,
             data: [],
@@ -63,11 +66,5 @@ export async function execute(this: IExecuteFunctions, index: number) {
 
     const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
-    const executionData = this.helpers.constructExecutionMetaData(
-
-        this.helpers.returnJsonArray(responseData as IDataObject),
-        { itemData: { item: index } },
-    );
-
-    return executionData;
+    return await toNodeOutput(this, index, responseData, outputFileName, 'pdf');
 }

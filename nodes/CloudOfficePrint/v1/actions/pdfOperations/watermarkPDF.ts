@@ -7,40 +7,43 @@ import type {
 import { updateDisplayOptions } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
-import { outputFileNameDesc } from '../../descriptions/common.description';
+import { outputBinaryPropertyDesc, outputFileNameDesc } from '../../descriptions/common.description';
 import {
-    getFilesData,
-    getSingleFileDesc,
-    getSingleFileParameters,
     appendPrependFileSupportedType,
+    fileFieldNames,
+    getFileFields,
+    resolveFile,
 } from '../../utils/file_utils';
+import { toNodeOutput } from '../../utils/output_utils';
+
+const fileNames = fileFieldNames();
 
 export const properties: INodeProperties[] = [
-    ...getSingleFileDesc('Content of the file to add a watermark to, encoded as Base64', appendPrependFileSupportedType),
+    ...getFileFields(fileNames, appendPrependFileSupportedType),
     {
         displayName: 'Watermark Text',
         name: 'watermark_text',
-        description: 'Text placed diagonally across every page',
+        description: 'Words stamped diagonally across every page of the result',
         placeholder: 'e.g. CONFIDENTIAL',
         type: 'string',
         default: '',
     }, {
         displayName: 'Watermark Color',
         name: 'watermark_color',
-        description: 'Color of the watermark text',
+        description: 'Color of the stamped text. A light grey stays readable underneath.',
         type: 'color',
         default: '#D3D3D3 ',
     }, {
         displayName: 'Watermark Font',
         name: 'watermark_font',
-        description: 'Font of the watermark text',
+        description: 'Font of the stamped text. The server falls back to Arial if it does not have this one.',
         type: 'string',
         default: 'Arial',
     },
     {
         displayName: 'Watermark Opacity in %',
         name: 'watermark_opacity',
-        description: 'Opacity of the watermark text (0-100)',
+        description: 'How solid the stamp is, from 0 for invisible to 100 for fully opaque',
         type: 'number',
         typeOptions: {
             minValue: 0,
@@ -51,7 +54,7 @@ export const properties: INodeProperties[] = [
     {
         displayName: 'Watermark Size',
         name: 'watermark_size',
-        description: 'Size of the watermark text (in px)',
+        description: 'Height of the stamped text in pixels',
         type: 'number',
         typeOptions: {
             minValue: 1,
@@ -60,6 +63,7 @@ export const properties: INodeProperties[] = [
         default: 45,
     },
     outputFileNameDesc,
+    outputBinaryPropertyDesc,
 ];
 
 const displayOptions = {
@@ -71,7 +75,7 @@ const displayOptions = {
 
 export const description = updateDisplayOptions(displayOptions, properties);
 export async function execute(this: IExecuteFunctions, index: number) {
-    const file = getSingleFileParameters(this, index, appendPrependFileSupportedType);
+    const file = await resolveFile(this, index, fileNames, appendPrependFileSupportedType);
 
     const watermarkText = this.getNodeParameter('watermark_text', index) as string;
     const watermarkColor = this.getNodeParameter('watermark_color', index) as string;
@@ -81,7 +85,7 @@ export async function execute(this: IExecuteFunctions, index: number) {
     const outputFileName = this.getNodeParameter('outputFileName', index) as string;
 
     const body: IDataObject = {
-        append_files: getFilesData([file]),
+        append_files: [file],
         template: {
             template_type: "converter"
         },
@@ -102,11 +106,5 @@ export async function execute(this: IExecuteFunctions, index: number) {
 
     const responseData = await CloudOfficePrintRequest.call(this, 'POST', '', body);
 
-    const executionData = this.helpers.constructExecutionMetaData(
-
-        this.helpers.returnJsonArray(responseData as IDataObject),
-        { itemData: { item: index } },
-    );
-
-    return executionData;
+    return await toNodeOutput(this, index, responseData, outputFileName, 'pdf');
 }

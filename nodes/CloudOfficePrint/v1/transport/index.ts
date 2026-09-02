@@ -70,28 +70,23 @@ export async function CloudOfficePrintRequest(
         const response = await this.helpers.httpRequest.call(this, options);
         return response;
     } catch (error) {
-        let copErrorFile: string | undefined;
-        if (error.status === 500 && error.response.data) {
-            let errorDescription = ""
-            if (error.response.headers['error_description']) {
-                errorDescription = error.response.headers['error_description'];
-                try {
-                    errorDescription = Buffer.from(errorDescription, 'base64').toString('utf-8');
-                } catch {
-                    // not base64, use as-is
-                }
-                copErrorFile = error.response.data;
-            }
-            throw new NodeApiError(this.getNode(), {
-                description: errorDescription || error.message || 'Cloud Office Print request failed',
-                message: 'Error file: ' + copErrorFile,
-                httpCode: error.status,
+        const response = error.response as { status?: number; headers?: IDataObject } | undefined;
+        const status = error.status ?? response?.status;
 
+        const errorResponse = (response ?? error) as JsonObject;
+        const httpCode = status === undefined ? undefined : String(status);
+
+        const encoded = response?.headers?.error_description;
+        if (encoded) {
+            throw new NodeApiError(this.getNode(), errorResponse, {
+                message: 'Cloud Office Print could not process the request',
+                description: Buffer.from(String(encoded), 'base64').toString('utf-8'),
+                httpCode,
             });
         }
-        throw new NodeApiError(this.getNode(), error.response as JsonObject, {
+        throw new NodeApiError(this.getNode(), errorResponse, {
             message: error.message || 'Cloud Office Print request failed',
-            httpCode: error.status
+            httpCode,
         });
     }
 }

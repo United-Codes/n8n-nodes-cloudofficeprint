@@ -2,7 +2,7 @@ import type { ILoadOptionsFunctions, INodePropertyOptions } from 'n8n-workflow';
 import { supportedOutputTypeBasedOnTemplate } from '../utils/file_utils';
 
 export async function getSupportedOutputTypeBasedOnTemplate(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-    const templateType = this.getNodeParameter('template.fileConfig.mimeType', 0) as string;
+    const templateType = this.getNodeParameter('templateType', '') as string;
     let options: INodePropertyOptions[];
     if (!templateType) {
         options = [
