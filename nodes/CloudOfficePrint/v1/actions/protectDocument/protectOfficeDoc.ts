@@ -8,10 +8,15 @@ import { updateDisplayOptions } from 'n8n-workflow';
 
 import { CloudOfficePrintRequest } from '../../transport';
 import { outputBinaryPropertyDesc, outputFileNameDesc } from '../../descriptions/common.description';
-import { fileFieldNames, getFileFields, resolveTemplate } from '../../utils/file_utils';
+import {
+    fileFieldNames,
+    getFileFields,
+    officeEncryptionSupportedType,
+    resolveTemplate,
+} from '../../utils/file_utils';
 import { toNodeOutput } from '../../utils/output_utils';
 
-const supportedTypes = ['docx', 'xlsx', 'pptx'];
+const supportedTypes = officeEncryptionSupportedType;
 const fileNames = fileFieldNames();
 
 export const properties: INodeProperties[] = [

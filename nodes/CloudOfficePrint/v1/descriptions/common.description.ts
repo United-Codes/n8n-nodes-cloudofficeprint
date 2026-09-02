@@ -13,6 +13,7 @@ export type FileFieldNames = {
     url: string;
     data: string;
     type: string;
+    fileName: string;
 };
 
 export const fileSourceOptions = [
@@ -76,6 +77,16 @@ export const fileDataDesc: INodeProperties = {
     placeholder: 'e.g. JVBERi0xLjcKJcTl8uXr...',
     description: 'File content as a Base64 string. Use the Input Binary Field source instead unless the Base64 is already sitting in your JSON.',
     hint: 'Raw Base64 only - no data:...;base64, prefix',
+};
+
+export const fileNameDesc: INodeProperties = {
+    displayName: 'File Name',
+    name: 'fileName',
+    type: 'string',
+    default: '',
+    placeholder: 'e.g. letter.docx',
+    description: 'Name to store the file under, including its extension. Leave empty to keep the name of the incoming binary file, or to have one generated for Base64.',
+    hint: 'Include the extension, e.g. factur-x.docx',
 };
 
 export const fileTypeDesc: INodeProperties = {

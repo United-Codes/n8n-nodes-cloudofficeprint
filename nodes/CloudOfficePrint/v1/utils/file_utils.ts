@@ -3,6 +3,7 @@ import { NodeOperationError } from 'n8n-workflow';
 import {
     binaryPropertyDesc,
     fileDataDesc,
+    fileNameDesc,
     fileSourceDesc,
     fileTypeDesc,
     fileUrlDesc,
@@ -27,6 +28,7 @@ export type FileValues = {
     fileUrl?: string;
     fileData?: string;
     mimeType?: string;
+    fileName?: string;
 };
 
 export const supportedMimeType = {
@@ -84,7 +86,8 @@ export const supportedOutputTypeBasedOnTemplate: { [key in keyof typeof supporte
 
 export const appendPrependFileSupportedType = ["pdf", "docx", "docm", "xlsx", "pptx", "pptm", "html", "md", "txt", "gif", "jpeg", "jpg", "png", "svg", "webp", "bmp", "msbmp", "doc", "ppt", "xls", "odt", "ods", "odp", "eml", "msg", "csv", "heic", "avif"]
 export const templateSupportedType = ["docx", "docm", "xlsx", "xlsm", "pptx", "pptm", "html", "md", "txt", "csv", "pdf", "ics", "ifb", "xml"];
-export const subtemplatesSupportedType = ["docx", "pptx"];
+export const attachmentSupportedType = [...appendPrependFileSupportedType, "xml"];
+export const officeEncryptionSupportedType = ["docx", "docm", "xlsx", "xlsm", "pptx", "pptm"];
 
 /** Sources a file slot offers unless the operation narrows them. */
 export const allFileSources: FileSource[] = ['binary', 'url', 'base64'];
@@ -98,6 +101,7 @@ export function fileFieldNames(prefix = ''): FileFieldNames {
             url: 'fileUrl',
             data: 'fileData',
             type: 'mimeType',
+            fileName: 'fileName',
         };
     }
     return {
@@ -106,6 +110,7 @@ export function fileFieldNames(prefix = ''): FileFieldNames {
         url: `${prefix}Url`,
         data: `${prefix}Data`,
         type: `${prefix}Type`,
+        fileName: `${prefix}FileName`,
     };
 }
 
@@ -131,6 +136,7 @@ export function getFileFields(
     allowedTypes: string[],
     label = '',
     allowedSources: FileSource[] = allFileSources,
+    withFileName = false,
 ): INodeProperties[] {
     const prefixed = (displayName: string) => (label ? `${label} ${displayName}` : displayName);
 
@@ -165,8 +171,13 @@ export function getFileFields(
     applyAllowedTypes(type, allowedTypes);
 
     const valueFields: Record<FileSource, INodeProperties> = { binary, url, base64: data };
+    const fields = [source, ...allowedSources.map((s) => valueFields[s]), type];
 
-    return [source, ...allowedSources.map((s) => valueFields[s]), type];
+    if (withFileName) {
+        fields.push({ ...fileNameDesc, name: names.fileName, displayName: prefixed('File Name') });
+    }
+
+    return fields;
 }
 
 /** A repeatable list of file slots, for operations that take more than one file. */
@@ -176,6 +187,7 @@ export function getFileCollectionDesc(
     description: string,
     allowedTypes: string[],
     allowedSources: FileSource[] = allFileSources,
+    withFileName = false,
 ): INodeProperties {
     return {
         displayName,
@@ -190,7 +202,7 @@ export function getFileCollectionDesc(
             {
                 name: 'fileConfig',
                 displayName: 'File Configuration',
-                values: getFileFields(fileFieldNames(), allowedTypes, '', allowedSources),
+                values: getFileFields(fileFieldNames(), allowedTypes, '', allowedSources, withFileName),
             } as INodePropertyCollection,
         ],
     };
@@ -216,6 +228,7 @@ export function readFileValues(
         fileUrl: ctx.getNodeParameter(names.url, index, '') as string,
         fileData: ctx.getNodeParameter(names.data, index, '') as string,
         mimeType: ctx.getNodeParameter(names.type, index, '') as string,
+        fileName: ctx.getNodeParameter(names.fileName, index, '') as string,
     };
 }
 
@@ -246,6 +259,7 @@ type Located = {
     source: FileSource;
     extension: string;
     filename: string;
+    url?: string;
     /** Base64 content, for the binary and base64 sources */
     content?: string;
 };
@@ -261,6 +275,7 @@ async function locate(
 ): Promise<Located> {
     const extension = resolveExtension(ctx, values, allowedTypes);
     const source = values.fileSource ?? 'base64';
+    const givenName = values.fileName?.trim() || undefined;
 
     if (!allowedSources.includes(source)) {
         throw new NodeOperationError(
@@ -281,7 +296,7 @@ async function locate(
             return {
                 source,
                 extension,
-                filename: metadata.fileName ?? `${fallbackName}.${extension}`,
+                filename: givenName ?? metadata.fileName ?? `${fallbackName}.${extension}`,
                 content: buffer.toString('base64'),
             };
         }
@@ -290,14 +305,19 @@ async function locate(
             if (!url) {
                 throw new NodeOperationError(ctx.getNode(), 'No URL given. Enter the URL the Cloud Office Print server should download the file from.', { itemIndex: index });
             }
-            return { source, extension, filename: url };
+            return {
+                source,
+                extension,
+                filename: givenName ?? fileNameFromUrl(url) ?? `${fallbackName}.${extension}`,
+                url,
+            };
         }
         case 'base64': {
             const content = values.fileData ?? '';
             if (!content) {
                 throw new NodeOperationError(ctx.getNode(), 'No file content found. Please provide the Base64 encoded file.', { itemIndex: index });
             }
-            return { source, extension, filename: `${fallbackName}.${extension}`, content };
+            return { source, extension, filename: givenName ?? `${fallbackName}.${extension}`, content };
         }
         default:
             throw new NodeOperationError(ctx.getNode(), `Unknown file source: ${source as string}`, { itemIndex: index });
@@ -318,7 +338,7 @@ export async function resolveTemplate(
     if (located.source === 'url') {
         return {
             template_type: located.extension,
-            url: located.filename,
+            url: located.url as string,
         };
     }
 
@@ -329,15 +349,16 @@ export async function resolveTemplate(
     };
 }
 
-function toResolvedFile(located: Located, fallbackName: string): ResolvedFile {
+/** Both shapes carry the same resolved name; only where the bytes come from differs. */
+function toResolvedFile(located: Located): ResolvedFile {
     const mime_type = extensionToMime(located.extension);
 
     if (located.source === 'url') {
         return {
             file_source: 'url',
-            file_url: located.filename,
+            file_url: located.url as string,
             mime_type,
-            filename: fileNameFromUrl(located.filename) ?? `${fallbackName}.${located.extension}`,
+            filename: located.filename,
         };
     }
 
@@ -360,7 +381,7 @@ export async function resolveFile(
 ): Promise<ResolvedFile> {
     const values = readFileValues(ctx, index, names);
     const located = await locate(ctx, index, values, allowedTypes, fallbackName, allowedSources);
-    return toResolvedFile(located, fallbackName);
+    return toResolvedFile(located);
 }
 
 /** Builds secondary file entries from a repeatable file list. */
@@ -375,7 +396,7 @@ export async function resolveFileList(
     for (let i = 0; i < entries.length; i++) {
         const fallbackName = `file_${i + 1}`;
         const located = await locate(ctx, index, entries[i] as FileValues, allowedTypes, fallbackName, allowedSources);
-        resolved.push(toResolvedFile(located, fallbackName));
+        resolved.push(toResolvedFile(located));
     }
     return resolved;
 }

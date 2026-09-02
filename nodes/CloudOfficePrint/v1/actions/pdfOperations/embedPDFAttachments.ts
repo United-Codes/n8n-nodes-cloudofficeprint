@@ -4,7 +4,7 @@ import { updateDisplayOptions, NodeOperationError } from 'n8n-workflow';
 import { CloudOfficePrintRequest } from '../../transport';
 import { outputBinaryPropertyDesc, outputFileNameDesc } from '../../descriptions/common.description';
 import {
-    appendPrependFileSupportedType,
+    attachmentSupportedType,
     fileFieldNames,
     getFileCollectionDesc,
     getFileFields,
@@ -17,6 +17,7 @@ import { toNodeOutput } from '../../utils/output_utils';
 const supportedTypes = ['pdf'];
 const pdfNames = fileFieldNames('pdf');
 const attachmentSources: FileSource[] = ['binary', 'base64'];
+const withFileName = true;
 
 export const properties: INodeProperties[] = [
     ...getFileFields(pdfNames, supportedTypes, 'PDF'),
@@ -24,8 +25,9 @@ export const properties: INodeProperties[] = [
         'attachment',
         'Attachments',
         'Files to attach inside the PDF. Click Add Attachments once per file; each picks its own source. Attachments cannot come from a URL - the server does not fetch them.',
-        appendPrependFileSupportedType,
+        attachmentSupportedType,
         attachmentSources,
+        withFileName,
     ),
     outputFileNameDesc,
     outputBinaryPropertyDesc,
@@ -47,7 +49,7 @@ export async function execute(this: IExecuteFunctions, index: number) {
     if (!entries || entries.length === 0) {
         throw new NodeOperationError(this.getNode(), 'No attachments found. Please add at least one file to embed.', { itemIndex: index });
     }
-    const attachments = await resolveFileList(this, index, entries, appendPrependFileSupportedType, attachmentSources);
+    const attachments = await resolveFileList(this, index, entries, attachmentSupportedType, attachmentSources);
 
     const outputFileName = this.getNodeParameter('outputFileName', index) as string;
 
