@@ -137,13 +137,13 @@ The node returns a PDF that reads *Dear John Doe, your invoice total is $250.00.
 
 | Field | What to enter |
 | --- | --- |
-| **File** | One file. Allowed: `docx`, `docm`, `xlsx`, `xlsm`, `pptx`, `pptm`, `html`, `md`, `txt`, `csv`, `pdf`, `ics`, `ifb`, `xml`. |
+| **File** | One file. Office documents (`docx`, `docm`, `xlsx`, `pptx`, `pptm`, `doc`, `xls`, `ppt`), OpenDocument (`odt`, `ods`, `odp`), text (`html`, `md`, `txt`, `csv`), mail (`eml`, `msg`), images (`gif`, `jpeg`, `jpg`, `png`, `svg`, `webp`, `bmp`, `msbmp`, `heic`, `avif`) and `pdf`. |
 
 **Merge to Single PDF File** converts and joins several files into one PDF, in order.
 
 | Field | What to enter |
 | --- | --- |
-| **Files** | Two or more files. Click **Add Files** for each. Office files and images are converted and appended. |
+| **Files** | Two or more files, in the order listed. Click **Add Files** for each; every one picks its own source. Same types as Convert to PDF — Office files, images, mail and text are converted on the way in. |
 
 **Split PDF** `Available from: v0.2.0` cuts one PDF into several. Two or more resulting files come back together as a zip.
 
@@ -167,7 +167,7 @@ The node returns a PDF that reads *Dear John Doe, your invoice total is $250.00.
 
 | Field | What to enter |
 | --- | --- |
-| **File** | One PDF. |
+| **File** | One file. Same types as Convert to PDF; anything that is not already a PDF is converted first. |
 | **Watermark Text** | The text to stamp. |
 | **Watermark Color** | Color of the text. |
 | **Watermark Font** | Font name. |
@@ -254,7 +254,8 @@ The output is always a PDF.
 | Field | What to enter |
 | --- | --- |
 | **PDF** | The PDF to attach the files to. |
-| **Attachments** | The files to attach. Click **Add Attachments** for each. |
+| **Attachments** | The files to attach. Click **Add Attachments** for each. Same types as Convert to PDF, plus `xml`. Binary or Base64 only — Cloud Office Print does not download an attachment from a URL. |
+| **File Name** *(per attachment)* | Name to store the attachment under, **with its extension**. eg: `letter.docx`, not `letter`. This is the name a PDF reader shows. Leave empty to keep an incoming binary file's own name; a Base64 attachment is otherwise named `file_(1|2|..).docx`. |
 
 ### Password Protect Document
 
@@ -262,7 +263,7 @@ The output is always a PDF.
 
 | Field | What to enter |
 | --- | --- |
-| **File** | One `docx`, `xlsx`, or `pptx` file. |
+| **File** | One `docx`, `docm`, `xlsx`, `xlsm`, `pptx` or `pptm` file. |
 | **Open Password** | Password needed to open the document. Office encrypts the whole file, so without it the contents cannot be read at all. |
 
 **Password Protect PDF** locks a PDF.
