@@ -3,9 +3,12 @@ import { describe, expect, it } from 'vitest';
 import type { IBinaryData, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import {
     allFileSources,
+    appendPrependFileSupportedType,
+    attachmentSupportedType,
     fileFieldNames,
     getFileCollectionDesc,
     getFileFields,
+    officeEncryptionSupportedType,
     resolveFile,
     resolveFileList,
     resolveTemplate,
@@ -42,6 +45,25 @@ function field(fields: INodeProperties[], name: string): INodeProperties {
     return found;
 }
 
+describe('supported type lists', () => {
+    // each list mirrors one in the AOP server; these pin them so a drift is visible
+    it('offers xml for attachments and nowhere else in the file lists', () => {
+        expect(attachmentSupportedType).toEqual([...appendPrependFileSupportedType, 'xml']);
+        expect(appendPrependFileSupportedType).not.toContain('xml');
+    });
+
+    it('does not offer types the server rejects as attachments', () => {
+        // the docs say any type; attachmentMimeTypes is a fixed list
+        for (const type of ['json', 'zip', 'ics', 'ifb', 'xlsm']) {
+            expect(attachmentSupportedType).not.toContain(type);
+        }
+    });
+
+    it('offers every Office type the server can encrypt', () => {
+        expect(officeEncryptionSupportedType).toEqual(['docx', 'docm', 'xlsx', 'xlsm', 'pptx', 'pptm']);
+    });
+});
+
 describe('fileFieldNames', () => {
     it('keeps the shipped names for an unprefixed slot', () => {
         expect(names).toEqual({
@@ -50,6 +72,7 @@ describe('fileFieldNames', () => {
             url: 'fileUrl',
             data: 'fileData',
             type: 'mimeType',
+            fileName: 'fileName',
         });
     });
 
@@ -255,6 +278,35 @@ describe('resolveFile', () => {
     it('accepts an ftp URL, which the server supports', async () => {
         const ctx = ctxWith({ fileSource: 'url', fileUrl: 'ftp://example.com/a.pdf', mimeType: 'pdf' });
         expect((await resolveFile(ctx, 0, names, ['pdf'])).file_source).toBe('url');
+    });
+});
+
+describe('attachment names', () => {
+    it('keeps the name of an incoming binary file', async () => {
+        const ctx = ctxWith(
+            { fileSource: 'binary', binaryProperty: 'data', mimeType: 'xml' },
+            { data: binaryItem('QUFBQQ==', 'factur-x.xml') },
+        );
+        expect((await resolveFile(ctx, 0, names, ['xml'])).filename).toBe('factur-x.xml');
+    });
+
+    it('uses a given file name over the binary one', async () => {
+        const ctx = ctxWith(
+            { fileSource: 'binary', binaryProperty: 'data', mimeType: 'xml', fileName: 'zugferd-invoice.xml' },
+            { data: binaryItem('QUFBQQ==', 'download.xml') },
+        );
+        expect((await resolveFile(ctx, 0, names, ['xml'])).filename).toBe('zugferd-invoice.xml');
+    });
+
+    it('names a Base64 attachment, which otherwise gets file_1.ext', async () => {
+        // the embedded name is what a reader shows, and e-invoicing requires a set name
+        const ctx = ctxWith({ fileSource: 'base64', fileData: 'BBBB', mimeType: 'xml', fileName: 'factur-x.xml' });
+        expect((await resolveFile(ctx, 0, names, ['xml'])).filename).toBe('factur-x.xml');
+    });
+
+    it('falls back to the slot name when none is given', async () => {
+        const ctx = ctxWith({ fileSource: 'base64', fileData: 'BBBB', mimeType: 'xml' });
+        expect((await resolveFile(ctx, 0, names, ['xml'], 'file_2')).filename).toBe('file_2.xml');
     });
 });
 
