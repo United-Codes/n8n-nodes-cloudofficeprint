@@ -10,15 +10,6 @@ import {
     NodeApiError,
 } from 'n8n-workflow';
 
-/**
- * Decodes a Base64 header value. Buffer.from never throws on bad input, it returns
- * mojibake, so the encoding is checked first rather than caught after.
- */
-function decodeBase64(value: string): string {
-    if (!/^[A-Za-z0-9+/]+={0,2}$/.test(value)) return value;
-    return Buffer.from(value, 'base64').toString('utf-8');
-}
-
 /** Sends a request to the Cloud Office Print API with the credential's api key and mode applied. */
 export async function CloudOfficePrintRequest(
     this: IExecuteFunctions | IExecuteSingleFunctions | ILoadOptionsFunctions | IPollFunctions,
@@ -89,7 +80,7 @@ export async function CloudOfficePrintRequest(
         if (encoded) {
             throw new NodeApiError(this.getNode(), errorResponse, {
                 message: 'Cloud Office Print could not process the request',
-                description: decodeBase64(String(encoded)),
+                description: Buffer.from(String(encoded), 'base64').toString('utf-8'),
                 httpCode,
             });
         }
