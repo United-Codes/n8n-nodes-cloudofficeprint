@@ -84,6 +84,17 @@ export const supportedOutputTypeBasedOnTemplate: { [key in keyof typeof supporte
     "xml": ["xml"]
 }
 
+/**
+ * The one output a template type allows, when it allows only one. Returns undefined as
+ * soon as a second is added to the table above, so the choice goes back to the user.
+ */
+export function onlyOutputTypeFor(templateType: string): string | undefined {
+    const outputs = supportedOutputTypeBasedOnTemplate[
+        templateType as keyof typeof supportedOutputTypeBasedOnTemplate
+    ] ?? [];
+    return outputs.length === 1 ? outputs[0] : undefined;
+}
+
 export const appendPrependFileSupportedType = ["pdf", "docx", "docm", "xlsx", "pptx", "pptm", "html", "md", "txt", "gif", "jpeg", "jpg", "png", "svg", "webp", "bmp", "msbmp", "doc", "ppt", "xls", "odt", "ods", "odp", "eml", "msg", "csv", "heic", "avif"]
 export const templateSupportedType = ["docx", "docm", "xlsx", "xlsm", "pptx", "pptm", "html", "md", "txt", "csv", "pdf", "ics", "ifb", "xml"];
 export const attachmentSupportedType = [...appendPrependFileSupportedType, "xml"];
@@ -117,13 +128,18 @@ export function fileFieldNames(prefix = ''): FileFieldNames {
 /** Limits the file type select to the allowed types, hiding it when only one is allowed. */
 function applyAllowedTypes(typeField: INodeProperties, allowedTypes: string[]) {
     if (allowedTypes.length === 1) {
-        // single supported type: no need to show a select
+        // single supported type: no need to show a select, and no text to show with it
         typeField.type = 'hidden';
         typeField.default = allowedTypes[0];
         delete typeField.options;
         delete typeField.hint;
+        delete typeField.description;
     } else {
-        typeField.options = allowedTypes.map((extension) => ({ name: extension, value: extension }));
+        // the value stays lower case, since it is the extension the API expects
+        typeField.options = allowedTypes.map((extension) => ({
+            name: extension.toUpperCase(),
+            value: extension,
+        }));
     }
 }
 
@@ -159,6 +175,8 @@ export function getFileFields(
         ...fileUrlDesc,
         name: names.url,
         displayName: prefixed('URL'),
+        // an example in a format this slot rejects reads as an instruction to fail
+        placeholder: `e.g. https://example.com/invoice.${allowedTypes[0]}`,
         displayOptions: { show: { [names.source]: ['url'] } },
     };
     const data: INodeProperties = {

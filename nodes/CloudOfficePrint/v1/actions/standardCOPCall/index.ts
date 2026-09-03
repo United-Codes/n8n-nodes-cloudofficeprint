@@ -19,8 +19,8 @@ export const description: INodeProperties[] = [
             {
                 name: 'Document Generation',
                 value: 'general',
-                description: 'Document generation with template',
-                action: 'Document generation with template',
+                description: 'Fill a template with your data and render it to PDF, Office, HTML and more',
+                action: 'Generate a document from a template',
             },
 
         ],

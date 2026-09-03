@@ -17,15 +17,15 @@ export const description: INodeProperties[] = [
         },
         options: [
             {
-                name: 'Password Protect Office Documents',
+                name: 'Password Protect Office Document',
                 value: 'protectOfficeDocument',
-                description: 'Password protect DOCX/PPTX/XLSX Document',
+                description: 'Encrypt a Word, Excel or PowerPoint file so a password is needed to open it',
                 action: 'Password protect an office document',
             },
             {
                 name: 'Password Protect PDF',
                 value: 'protectPDF',
-                description: 'Protect a PDF with a password',
+                description: 'Set an open password, an edit password, or both, on a PDF',
                 action: 'Protect a PDF',
             }
         ],

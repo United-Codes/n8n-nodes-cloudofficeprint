@@ -79,18 +79,22 @@ export class CloudOfficePrint implements INodeType {
                     {
                         name: 'Document Generation',
                         value: 'documentGeneration',
+                        description: 'Fill a template with data and render it to PDF, Office, HTML and more',
                     },
                     {
                         name: 'PDF Operation',
                         value: 'pdfOperations',
-                    },
-                    {
-                        name: 'Password Protect Document',
-                        value: 'protectDocument',
+                        description: 'Convert, merge, split, compress or watermark a PDF, and work with its forms and attachments',
                     },
                     {
                         name: 'PDF Compare',
                         value: 'pdfCompare',
+                        description: 'Produce a PDF that highlights what changed between two versions',
+                    },
+                    {
+                        name: 'Password Protect Document',
+                        value: 'protectDocument',
+                        description: 'Encrypt a PDF or Office file so a password is needed to open or edit it',
                     },
                 ],
             },

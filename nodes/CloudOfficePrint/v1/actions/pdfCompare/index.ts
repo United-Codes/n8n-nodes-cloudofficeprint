@@ -18,7 +18,7 @@ export const description: INodeProperties[] = [
             {
                 name: 'Compare Two PDF Files',
                 value: 'pdfCompare',
-
+                description: 'Produce a PDF that marks every difference between an original and a changed version',
                 action: 'Compare two PDF files',
             }
         ],

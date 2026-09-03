@@ -20,7 +20,7 @@ export const properties: INodeProperties[] = [
         type: 'options',
         default: 'form_fields',
         required: true,
-        description: 'What to get back about the form',
+        description: 'What to return about the form. The JSON options list the field names with their current values; the marked PDF prints each name onto the page it sits on, which is the quickest way to learn what a field is called.',
         options: [
             {
                 name: 'Field Names and Values as JSON',
