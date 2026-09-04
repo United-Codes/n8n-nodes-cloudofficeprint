@@ -1,28 +1,28 @@
 import type { INodeProperties } from 'n8n-workflow';
-import * as convertFileToPDF from './convertFileToPDF';
-import * as mergeToPDF from './mergeToPDF';
-import * as splitPDF from './splitPDF';
 import * as compressPDF from './compressPDF';
-import * as watermarkPDF from './watermarkPDF';
-import * as pdfToImage from './pdfToImage';
-import * as readPDFFormFields from './readPDFFormFields';
-import * as fillPDFForm from './fillPDFForm';
+import * as convertFileToPDF from './convertFileToPDF';
 import * as createPDFForm from './createPDFForm';
-import * as extractPDFAttachments from './extractPDFAttachments';
 import * as embedPDFAttachments from './embedPDFAttachments';
+import * as extractPDFAttachments from './extractPDFAttachments';
+import * as fillPDFForm from './fillPDFForm';
+import * as mergeToPDF from './mergeToPDF';
+import * as pdfToImage from './pdfToImage';
+import * as watermarkPDF from './watermarkPDF';
+import * as readPDFFormFields from './readPDFFormFields';
+import * as splitPDF from './splitPDF';
 
 export {
-    convertFileToPDF,
-    mergeToPDF,
-    splitPDF,
     compressPDF,
-    watermarkPDF,
-    pdfToImage,
-    readPDFFormFields,
-    fillPDFForm,
+    convertFileToPDF,
     createPDFForm,
-    extractPDFAttachments,
     embedPDFAttachments,
+    extractPDFAttachments,
+    fillPDFForm,
+    mergeToPDF,
+    pdfToImage,
+    watermarkPDF,
+    readPDFFormFields,
+    splitPDF,
 };
 
 export const description: INodeProperties[] = [
@@ -36,56 +36,18 @@ export const description: INodeProperties[] = [
                 resource: ['pdfOperations'],
             },
         },
-        // by how often each is used, keeping the merge/split, form and attachment pairs together
-        // eslint-disable-next-line n8n-nodes-base/node-param-options-type-unsorted-items
         options: [
-            {
-                name: 'Convert to PDF',
-                value: 'convertFileToPDF',
-                description: 'Convert files to PDF',
-                action: "Convert to PDF"
-            },
-            {
-                name: 'Merge to Single PDF File',
-                value: 'mergeToPDF',
-                description: 'Convert and merge files to PDF',
-                action: "Merge to PDF"
-            },
-            {
-                name: 'Split PDF',
-                value: 'splitPDF',
-                description: 'Split a PDF into several PDFs, by page count or by text on the page',
-                action: 'Split a PDF',
-            },
             {
                 name: 'Compress PDF',
                 value: 'compressPDF',
                 description: 'Compress a PDF file',
-                action: "Compress PDF"
+                action: 'Compress a PDF',
             },
             {
-                name: 'PDF Watermark',
-                value: 'watermarkPDF',
-                description: 'Add a watermark to a PDF',
-                action: 'Add a watermark to a PDF',
-            },
-            {
-                name: 'PDF to Image',
-                value: 'pdfToImage',
-                description: 'Convert the pages of a PDF to JPEG images',
-                action: 'Convert a PDF to images',
-            },
-            {
-                name: 'Read PDF Form Fields',
-                value: 'readPDFFormFields',
-                description: 'List the fields of a PDF form with their values, or mark their names onto the PDF',
-                action: 'Read the fields of a PDF form',
-            },
-            {
-                name: 'Fill PDF Form',
-                value: 'fillPDFForm',
-                description: 'Fill in the form fields of an existing PDF and optionally flatten it',
-                action: 'Fill a PDF form',
+                name: 'Convert to PDF',
+                value: 'convertFileToPDF',
+                description: 'Turn an Office file, image or HTML document into a PDF',
+                action: 'Convert a file to PDF',
             },
             {
                 name: 'Create PDF Form',
@@ -94,29 +56,65 @@ export const description: INodeProperties[] = [
                 action: 'Create a PDF form',
             },
             {
+                name: 'Embed Attachments in PDF',
+                value: 'embedPDFAttachments',
+                description: 'Attach one or more files inside a PDF',
+                action: 'Embed attachments in a PDF',
+            },
+            {
                 name: 'Extract Attachments From PDF',
                 value: 'extractPDFAttachments',
                 description: 'Get the files attached inside a PDF',
                 action: 'Extract attachments from a PDF',
             },
             {
-                name: 'Embed Attachments in PDF',
-                value: 'embedPDFAttachments',
-                description: 'Attach one or more files inside a PDF',
-                action: 'Embed attachments in a PDF',
+                name: 'Fill PDF Form',
+                value: 'fillPDFForm',
+                description: 'Fill in the form fields of an existing PDF and optionally flatten it',
+                action: 'Fill a PDF form',
+            },
+            {
+                name: 'Merge to Single PDF File',
+                value: 'mergeToPDF',
+                description: 'Join several files into one PDF, converting each of them on the way in',
+                action: 'Merge files into one PDF',
+            },
+            {
+                name: 'PDF to Image',
+                value: 'pdfToImage',
+                description: 'Convert the pages of a PDF to JPEG images',
+                action: 'Convert a PDF to images',
+            },
+            {
+                name: 'PDF Watermark',
+                value: 'watermarkPDF',
+                description: 'Add a watermark to a PDF',
+                action: 'Add a watermark to a PDF',
+            },
+            {
+                name: 'Read PDF Form Fields',
+                value: 'readPDFFormFields',
+                description: 'List the fields of a PDF form with their values, or mark their names onto the PDF',
+                action: 'Read the fields of a PDF form',
+            },
+            {
+                name: 'Split PDF',
+                value: 'splitPDF',
+                description: 'Split a PDF into several PDFs, by page count or by text on the page',
+                action: 'Split a PDF',
             },
         ],
         default: 'convertFileToPDF',
     },
-    ...convertFileToPDF.description,
-    ...mergeToPDF.description,
-    ...splitPDF.description,
     ...compressPDF.description,
-    ...watermarkPDF.description,
-    ...pdfToImage.description,
-    ...readPDFFormFields.description,
-    ...fillPDFForm.description,
+    ...convertFileToPDF.description,
     ...createPDFForm.description,
-    ...extractPDFAttachments.description,
     ...embedPDFAttachments.description,
+    ...extractPDFAttachments.description,
+    ...fillPDFForm.description,
+    ...mergeToPDF.description,
+    ...pdfToImage.description,
+    ...watermarkPDF.description,
+    ...readPDFFormFields.description,
+    ...splitPDF.description,
 ];

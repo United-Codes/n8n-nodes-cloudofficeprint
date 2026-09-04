@@ -1,6 +1,14 @@
 # Changelog
+## 0.2.1 - 2026-09-03
+Corrects the two n8n node guideline violations that held up verification of 0.2.0, and revises the help text across every resource and operation.
 
-## 0.2.0 - 2026-09-01
+### Changed
+- Output Type on Document Generation is no longer a required field. For a template type with only one possible output - PDF, XML, ICS or IFB - the node supplies the value itself rather than showing a disabled field. Should Cloud Office Print add a second output for one of those types, the dropdown returns on its own.
+- PDF Operations are listed alphabetically, as the node guidelines require.
+- Password Protect Office Document described its input as DOCX/PPTX/XLSX, though the operation also accepts DOCM, XLSM and PPTM.
+
+
+## 0.2.0 - 2026-09-02
 
 **Breaking.** Files now go in and out as binary data, and the file parameters were renamed. In workflows saved with 0.1.x, re-enter the file on every action.
 

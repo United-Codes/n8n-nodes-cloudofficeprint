@@ -104,9 +104,28 @@ describe('getFileFields', () => {
 
     it('limits the file type select to the allowed types', () => {
         expect(field(fields, 'mimeType').options).toEqual([
-            { name: 'docx', value: 'docx' },
-            { name: 'xlsx', value: 'xlsx' },
+            { name: 'DOCX', value: 'docx' },
+            { name: 'XLSX', value: 'xlsx' },
         ]);
+    });
+
+    it('labels a type in upper case but keeps the value as the extension', () => {
+        // the value reaches the API as template_type, so it must stay lower case
+        const options = field(fields, 'mimeType').options as Array<{ name: string; value: string }>;
+        for (const option of options) {
+            expect(option.name).toBe(option.value.toUpperCase());
+        }
+    });
+
+    it('drops the description of a hidden type field, since nothing shows it', () => {
+        const single = field(getFileFields(names, ['pdf']), 'mimeType');
+        expect(single.description).toBeUndefined();
+        expect(single.hint).toBeUndefined();
+    });
+
+    it('gives the URL example an extension the slot actually accepts', () => {
+        expect(field(getFileFields(names, ['pdf']), 'fileUrl').placeholder).toContain('.pdf');
+        expect(field(getFileFields(names, ['docx', 'xlsx']), 'fileUrl').placeholder).toContain('.docx');
     });
 
     it('hides the file type select when only one type is allowed', () => {
@@ -119,8 +138,8 @@ describe('getFileFields', () => {
     it('does not leak allowed types between slots', () => {
         getFileFields(names, ['pdf']);
         expect(field(getFileFields(names, ['docx', 'xlsx']), 'mimeType').options).toEqual([
-            { name: 'docx', value: 'docx' },
-            { name: 'xlsx', value: 'xlsx' },
+            { name: 'DOCX', value: 'docx' },
+            { name: 'XLSX', value: 'xlsx' },
         ]);
     });
 

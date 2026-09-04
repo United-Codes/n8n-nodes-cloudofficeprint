@@ -23,7 +23,7 @@ export const properties: INodeProperties[] = [
     {
         displayName: 'Watermark Text',
         name: 'watermark_text',
-        description: 'Words stamped diagonally across every page of the result',
+        description: 'Text stamped diagonally across every page of the result. Leave empty to add no watermark.',
         placeholder: 'e.g. CONFIDENTIAL',
         type: 'string',
         default: '',
@@ -32,7 +32,7 @@ export const properties: INodeProperties[] = [
         name: 'watermark_color',
         description: 'Color of the stamped text. A light grey stays readable underneath.',
         type: 'color',
-        default: '#D3D3D3 ',
+        default: '#D3D3D3',
     }, {
         displayName: 'Watermark Font',
         name: 'watermark_font',
