@@ -84,14 +84,19 @@ export const supportedOutputTypeBasedOnTemplate: { [key in keyof typeof supporte
     "xml": ["xml"]
 }
 
+/** Every output a template type allows, empty for a type the table does not know. */
+export function supportedOutputTypesFor(templateType: string): string[] {
+    return supportedOutputTypeBasedOnTemplate[
+        templateType as keyof typeof supportedOutputTypeBasedOnTemplate
+    ] ?? [];
+}
+
 /**
  * The one output a template type allows, when it allows only one. Returns undefined as
  * soon as a second is added to the table above, so the choice goes back to the user.
  */
 export function onlyOutputTypeFor(templateType: string): string | undefined {
-    const outputs = supportedOutputTypeBasedOnTemplate[
-        templateType as keyof typeof supportedOutputTypeBasedOnTemplate
-    ] ?? [];
+    const outputs = supportedOutputTypesFor(templateType);
     return outputs.length === 1 ? outputs[0] : undefined;
 }
 

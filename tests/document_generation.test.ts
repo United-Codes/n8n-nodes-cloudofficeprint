@@ -107,3 +107,42 @@ describe('execute with the Output Type field hidden', () => {
         await expect(execute.call(ctx, 0)).rejects.toThrow('Choose an Output Type');
     });
 });
+
+/**
+ * n8n keeps whatever Output Type was stored when the template type changes, so a choice
+ * made for a DOCX template can still be there once the template is an XML one.
+ */
+describe('execute with an Output Type left over from another template type', () => {
+    const base = {
+        templateSource: 'base64',
+        templateData: 'AAAA',
+        data: '{}',
+        outputFileName: 'out',
+        debugMode: true,
+    };
+
+    it('sends the only valid output instead of the stale one', async () => {
+        const ctx = strictCtx({ ...base, templateType: 'xml', outputType: 'pdf' });
+        const [item] = await execute.call(ctx, 0);
+        expect((item.json as IDataObject).output).toMatchObject({ output_type: 'xml' });
+    });
+
+    it('does the same for every single-output template type', async () => {
+        for (const templateType of ['pdf', 'ics', 'ifb']) {
+            const ctx = strictCtx({ ...base, templateType, outputType: 'docx' });
+            const [item] = await execute.call(ctx, 0);
+            expect((item.json as IDataObject).output).toMatchObject({ output_type: templateType });
+        }
+    });
+
+    it('rejects a stale choice the new template type cannot produce', async () => {
+        const ctx = strictCtx({ ...base, templateType: 'xlsx', outputType: 'rtf' });
+        await expect(execute.call(ctx, 0)).rejects.toThrow('A xlsx template cannot produce rtf');
+    });
+
+    it('still sends a choice the template type does support', async () => {
+        const ctx = strictCtx({ ...base, templateType: 'docx', outputType: 'pdf' });
+        const [item] = await execute.call(ctx, 0);
+        expect((item.json as IDataObject).output).toMatchObject({ output_type: 'pdf' });
+    });
+});

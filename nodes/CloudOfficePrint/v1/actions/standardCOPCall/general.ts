@@ -8,6 +8,7 @@ import {
     getFileFields,
     onlyOutputTypeFor,
     resolveTemplate,
+    supportedOutputTypesFor,
     templateSupportedType,
 } from '../../utils/file_utils';
 import { extensionForOutputType, toNodeOutput } from '../../utils/output_utils';
@@ -47,13 +48,22 @@ export async function execute(this: IExecuteFunctions, index: number) {
     const outputFileName = this.getNodeParameter('outputFileName', index) as string;
 
     // the field is not required, so it can arrive empty; the table fills it in when the
-    // template type allows only one output, and otherwise the choice is genuinely the user's
+    // template type allows only one output, and otherwise the choice is genuinely the user's.
+    // n8n keeps a stored value when the template type changes, so the table wins over it
     const chosen = this.getNodeParameter('outputType', index, '') as string;
-    const outputType = chosen || onlyOutputTypeFor(template.template_type);
+    const outputType = onlyOutputTypeFor(template.template_type) ?? chosen;
     if (!outputType) {
         throw new NodeOperationError(
             this.getNode(),
             `Choose an Output Type. A ${template.template_type} template can produce more than one format, so the node cannot pick for you.`,
+            { itemIndex: index },
+        );
+    }
+    const supported = supportedOutputTypesFor(template.template_type);
+    if (!supported.includes(outputType)) {
+        throw new NodeOperationError(
+            this.getNode(),
+            `A ${template.template_type} template cannot produce ${outputType}. Choose one of: ${supported.join(', ')}.`,
             { itemIndex: index },
         );
     }
