@@ -1,0 +1,410 @@
+{
+  "name": "Create contract review packs with redline comparisons using Cloud Office Print",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Contract review pack\n\nWhen a counterparty sends back a revised contract, upload both versions and get one PDF for the approvers: a cover sheet with the deal contact and sign-off boxes, followed by a comparison of the two versions.\n\n### How it works\n1. **Start a contract review** takes both PDFs, the counterparty's email and a due date.\n2. Cloud Office Print compares the versions and stamps the result FOR INTERNAL REVIEW.\n3. The counterparty is looked up in the CRM by email.\n4. A DOCX cover sheet is filled and turned into a PDF.\n5. Cover and comparison are merged into one review pack and saved to Google Drive.\n\n### Setup steps\n1. Install the `n8n-nodes-cloudofficeprint` community node.\n2. Add your Cloud Office Print credential to the four Cloud Office Print nodes.\n3. Point **Look up counterparty in CRM** at your CRM.\n4. Connect Google Drive, see the note under the workflow.\n\nTo try it, upload `consulting-agreement-v1.pdf` and `-v2.pdf` from the Google Drive and Counterparty  Email (emily.johnson@x.dummyjson.com)",
+        "height": 880,
+        "width": 388
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        112
+      ],
+      "id": "1580228f-fd89-41d7-b166-928488af39fa",
+      "name": "Sticky Note - Overview"
+    },
+    {
+      "parameters": {
+        "content": "## Compare the versions\nThe comparison is kept as Base64, because the CRM call that follows replaces the item's files.",
+        "height": 400,
+        "width": 980,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        416,
+        208
+      ],
+      "id": "478f1c04-4515-49e5-a5c8-bb3198dc6f50",
+      "name": "Sticky Note - Compare the versions"
+    },
+    {
+      "parameters": {
+        "content": "## Build the review pack\nThe first file in **Merge review pack** is the cover sheet, the second is the stamped comparison.\n\n**Download cover template** gets the template from Google Drive. Pick your own copy there.",
+        "height": 400,
+        "width": 1480,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        208
+      ],
+      "id": "9609c631-5386-432a-ada4-a9357e3e1f42",
+      "name": "Sticky Note - Build the review pack"
+    },
+    {
+      "parameters": {
+        "content": "### Google Drive setup\n1. In n8n, create a **Google Drive OAuth2 API** credential. On n8n Cloud, just sign in with Google.\n2. Self-hosted: in Google Cloud, enable the Google Drive API, create an OAuth client ID and add the **OAuth Redirect URL** shown in n8n. Paste the client ID and secret into the credential and sign in.\n3. Select the credential on **Upload to Google Drive** and pick a folder.",
+        "height": 456,
+        "width": 264,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        96
+      ],
+      "id": "fd74fa80-c812-4ed2-b621-0d5199e3662d",
+      "name": "Sticky Note - Google Drive setup"
+    },
+    {
+      "parameters": {
+        "formTitle": "Contract review",
+        "formDescription": "Upload the previous and revised versions. The review pack is saved to Google Drive.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Contract name",
+              "fieldName": "contract_name",
+              "placeholder": "e.g. Harbor & Finch consulting agreement",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Counterparty contact email",
+              "fieldType": "email",
+              "fieldName": "counterparty_email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Previous version",
+              "fieldType": "file",
+              "fieldName": "previous_version",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Revised version",
+              "fieldType": "file",
+              "fieldName": "revised_version",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Review due",
+              "fieldType": "date",
+              "fieldName": "due_date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your name",
+              "fieldName": "requested_by",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Create review pack",
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Thanks. The review pack will be in Google Drive in a minute."
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        432,
+        352
+      ],
+      "id": "4baff00a-4fda-451c-9bbe-338ff68df6f6",
+      "name": "Start a contract review",
+      "webhookId": "98a2e12e-5d30-42ab-b355-e001598fbada"
+    },
+    {
+      "parameters": {
+        "resource": "pdfCompare",
+        "compareFile1BinaryProperty": "previous_version",
+        "compareFile2BinaryProperty": "revised_version",
+        "outputFileName": "comparison"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        720,
+        384
+      ],
+      "id": "ea4aa260-64a9-4164-a8f5-9027fc0fd57a",
+      "name": "Compare versions"
+    },
+    {
+      "parameters": {
+        "operation": "watermarkPDF",
+        "mimeType": "pdf",
+        "watermark_text": "FOR INTERNAL REVIEW",
+        "watermark_color": "#C0392B",
+        "watermark_opacity": 18,
+        "watermark_size": 48,
+        "outputFileName": "comparison"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        960,
+        352
+      ],
+      "id": "f8a56e38-d5aa-4017-878c-3edb9cc8640d",
+      "name": "Stamp FOR INTERNAL REVIEW"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "destinationKey": "comparison",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1232,
+        352
+      ],
+      "id": "6d58204e-5fd6-49d9-8b3a-78dfa1f01595",
+      "name": "Keep comparison"
+    },
+    {
+      "parameters": {
+        "url": "=https://dummyjson.com/users/filter?key=email&value={{ encodeURIComponent($('Start a contract review').first().json.counterparty_email) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1520,
+        416
+      ],
+      "id": "7beb02b5-bdae-4794-9f6b-c68db10b6e2c",
+      "name": "Look up counterparty in CRM"
+    },
+    {
+      "parameters": {
+        "jsCode": "const form = $('Start a contract review').first();\nconst answers = form.json;\nconst files = form.binary ?? {};\n// the CRM returns an empty list when it doesn't know the email\nconst contact = $input.first().json.users?.[0];\n\nreturn [{\n  json: {\n    contract_name: answers.contract_name,\n    requested_by: answers.requested_by,\n    due_date: DateTime.fromISO(answers.due_date).toFormat('MMMM d, yyyy'),\n    created_on: $now.toFormat('MMMM d, yyyy'),\n    previous_file: files.previous_version?.fileName ?? '',\n    revised_file: files.revised_version?.fileName ?? '',\n    counterparty_name: contact ? `${contact.firstName} ${contact.lastName}` : 'Not found in CRM',\n    counterparty_title: contact?.company?.title ?? '',\n    counterparty_company: contact?.company?.name ?? '',\n    counterparty_email: answers.counterparty_email,\n    counterparty_phone: contact?.phone ?? '',\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        416
+      ],
+      "id": "b7eb73cc-18b6-483f-9ebf-5787fe38d432",
+      "name": "Prepare cover sheet"
+    },
+    {
+      "parameters": {
+        "resource": "documentGeneration",
+        "templateType": "docx",
+        "data": "={{ JSON.stringify($('Prepare cover sheet').first().json) }}",
+        "outputFileName": "cover",
+        "outputType": "pdf"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        416
+      ],
+      "id": "ffe6bd29-c3f8-4792-9a6a-327015dd0090",
+      "name": "Generate cover sheet"
+    },
+    {
+      "parameters": {
+        "operation": "mergeToPDF",
+        "file": {
+          "fileConfig": [
+            {
+              "mimeType": "pdf"
+            },
+            {
+              "fileSource": "base64",
+              "fileData": "={{ $('Keep comparison').first().json.comparison }}",
+              "mimeType": "pdf"
+            }
+          ]
+        },
+        "outputFileName": "=Review pack - {{ $('Start a contract review').first().json.contract_name }}"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        2480,
+        416
+      ],
+      "id": "58597c62-7731-4281-96b7-58fd0e4e3b81",
+      "name": "Merge review pack"
+    },
+    {
+      "parameters": {
+        "name": "={{ $binary.data.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2720,
+        448
+      ],
+      "id": "10087914-aa61-4184-8d88-8c3b32de2cc5",
+      "name": "Upload to Google Drive"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2000,
+        416
+      ],
+      "id": "180610b0-76e1-4c34-9e8e-cae00a8ce5bc",
+      "name": "Download cover template"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start a contract review": {
+      "main": [
+        [
+          {
+            "node": "Compare versions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare versions": {
+      "main": [
+        [
+          {
+            "node": "Stamp FOR INTERNAL REVIEW",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stamp FOR INTERNAL REVIEW": {
+      "main": [
+        [
+          {
+            "node": "Keep comparison",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep comparison": {
+      "main": [
+        [
+          {
+            "node": "Look up counterparty in CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Look up counterparty in CRM": {
+      "main": [
+        [
+          {
+            "node": "Prepare cover sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare cover sheet": {
+      "main": [
+        [
+          {
+            "node": "Download cover template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate cover sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge review pack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge review pack": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download cover template": {
+      "main": [
+        [
+          {
+            "node": "Generate cover sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

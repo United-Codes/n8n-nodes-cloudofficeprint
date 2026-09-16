@@ -1,0 +1,344 @@
+{
+  "name": "Build product catalog Slide and PDF output from an API with Cloud Office Print",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Product catalog slide on request\n\nA sales rep picks a category on a form and gets a fresh PowerPoint slides, a PDF handout and slide images saved in Google Drive.\n\n### How it works\n1. **Choose a category** is an n8n form.\n2. **Get products** reads that category from a products API.\n3. Cloud Office Print fills the PPTX template: a cover, one slide per product with its photo, and a closing slide.\n4. The deck is converted to a PDF handout.\n5. Every slide is also rendered as a JPEG for chat or the website.\n6. All three files are uploaded to Google Drive.\n\n### Setup steps\n1. Install the `n8n-nodes-cloudofficeprint` community node.\n2. Add your Cloud Office Print credential to the three Cloud Office Print nodes.\n3. Set your company and sales contact in **Slide settings**.\n4. Connect Google Drive, see the note under the workflow.",
+        "height": 700,
+        "width": 420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        464,
+        -288
+      ],
+      "id": "de770819-16d8-484c-842d-3275d0ae3010",
+      "name": "Sticky Note - Overview"
+    },
+    {
+      "parameters": {
+        "content": "## Get the products\nSwap the API URL for your data(here we used dummy rest API ). **Prepare slides** decides what each product slide shows.",
+        "height": 400,
+        "width": 980,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -96
+      ],
+      "id": "95d9b8c3-876a-4de4-84a8-c847543cacfd",
+      "name": "Sticky Note - Get the products"
+    },
+    {
+      "parameters": {
+        "content": "## Build the Slides, handout and images\nThe `{!products}` tag repeats the product slide once per product. `{%image}` places the product photo.\n\n**Download  template** gets the template from Google Drive. Pick your own copy there.",
+        "height": 560,
+        "width": 1240,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        -96
+      ],
+      "id": "cfd07d70-1f44-4c68-b225-e12ae9d7eefe",
+      "name": "Sticky Note - Build the deck, handout and images"
+    },
+    {
+      "parameters": {
+        "content": "### Google Drive setup\n1. In n8n, create a **Google Drive OAuth2 API** credential. On n8n Cloud, just sign in with Google.\n2. Self-hosted: in Google Cloud, enable the Google Drive API, create an OAuth client ID and add the **OAuth Redirect URL** shown in n8n. Paste the client ID and secret into the credential and sign in.\n3. Select the credential on **Upload to Google Drive** and pick a folder.",
+        "height": 392,
+        "width": 248,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2928,
+        176
+      ],
+      "id": "3325c433-76d3-4737-b61d-2285ab2c0382",
+      "name": "Sticky Note - Google Drive setup"
+    },
+    {
+      "parameters": {
+        "formTitle": "Product catalog",
+        "formDescription": "Pick a category. The deck, a PDF handout and slide images land in Google Drive in about a minute.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Category",
+              "fieldType": "dropdown",
+              "fieldName": "category",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Smartphones"
+                  },
+                  {
+                    "option": "Laptops"
+                  },
+                  {
+                    "option": "Tablets"
+                  },
+                  {
+                    "option": "Mobile Accessories"
+                  },
+                  {
+                    "option": "Fragrances"
+                  },
+                  {
+                    "option": "Skin Care"
+                  },
+                  {
+                    "option": "Furniture"
+                  },
+                  {
+                    "option": "Home Decoration"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Create deck",
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Your catalog is being built. Check Google Drive in a minute."
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        944,
+        48
+      ],
+      "id": "f3767d71-a8e7-4925-bfba-3cdf838ae8d8",
+      "name": "Choose a category",
+      "webhookId": "2b4239c1-f523-41e8-a5b1-2ab53aebb5c2"
+    },
+    {
+      "parameters": {
+        "url": "=https://dummyjson.com/products/category/{{ $('Choose a category').first().json.category.toLowerCase().replaceAll(' ', '-') }}?limit=0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1456,
+        112
+      ],
+      "id": "f95e5bf7-d80a-4432-95ab-0e1b1d5c64c9",
+      "name": "Get products"
+    },
+    {
+      "parameters": {
+        "jsCode": "const settings = $('Slide settings').first().json;\nconst category = $('Choose a category').first().json.category;\nconst { products } = $input.first().json;\nconst money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });\nconst generatedOn = $now.toFormat('MMMM d, yyyy');\n\nreturn [{\n  json: {\n    company: settings.company,\n    sales_contact: settings.sales_contact,\n    category_title: category,\n    product_count: products.length,\n    generated_on: generatedOn,\n    products: products.map((p) => ({\n      title: p.title,\n      brand: p.brand ?? '',\n      price: money.format(p.price),\n      rating: p.rating.toFixed(1),\n      stock_label: p.stock > 0 ? `${p.stock} in stock` : 'Out of stock',\n      description: p.description,\n      category_title: category,\n      image: p.images?.[0] ?? p.thumbnail,\n      image_max_width: '400px',\n      image_max_height: '400px',\n    })),\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        112
+      ],
+      "id": "cf2ac4de-9444-4c2b-8682-1cda94b640d1",
+      "name": "Prepare slides"
+    },
+    {
+      "parameters": {
+        "operation": "pdfToImage",
+        "imageResolution": 96,
+        "outputFileName": "={{ $('Choose a category').first().json.category }} catalog slides"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        2720,
+        240
+      ],
+      "id": "a5e0a688-1609-434f-a711-03a44435dd34",
+      "name": "Slides to images"
+    },
+    {
+      "parameters": {
+        "name": "={{ $binary.data.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2928,
+        0
+      ],
+      "id": "21e4e136-3e26-4c0b-ba18-060416525c67",
+      "name": "Upload to Google Drive"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"company\": \"Demo-COP\",\n  \"sales_contact\": \"you@example.com\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1216,
+        112
+      ],
+      "id": "cb6320d8-7714-4ef9-a901-f0be3afb8bfc",
+      "name": "Slide settings"
+    },
+    {
+      "parameters": {
+        "resource": "documentGeneration",
+        "templateSource": "url",
+        "templateUrl": "",
+        "templateType": "pptx",
+        "data": "={{ JSON.stringify($('Prepare slides').first().json) }}",
+        "outputFileName": "={{ $('Choose a category').first().json.category }} catalog",
+        "outputType": "pptx"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        112
+      ],
+      "id": "bbdbfb9d-5bba-484d-beff-ddb09ada2985",
+      "name": "Generate Slides"
+    },
+    {
+      "parameters": {
+        "mimeType": "pptx",
+        "outputFileName": "={{ $('Choose a category').first().json.category }} catalog handout"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        224
+      ],
+      "id": "b310a028-4531-4112-8330-b2f4220aaf4b",
+      "name": "Convert Slide to PDF"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Choose a category": {
+      "main": [
+        [
+          {
+            "node": "Slide settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get products": {
+      "main": [
+        [
+          {
+            "node": "Prepare slides",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare slides": {
+      "main": [
+        [
+          {
+            "node": "Generate Slides",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slides to images": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slide settings": {
+      "main": [
+        [
+          {
+            "node": "Get products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Slides": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Convert Slide to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Slide to PDF": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Slides to images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
