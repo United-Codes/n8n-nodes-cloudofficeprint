@@ -1,0 +1,329 @@
+{
+  "name": "Generate training certificates from a REST API with Cloud Office Print",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Generate training certificates from a REST API\n\nPulls trainees from an API, fills a Word certificate for each one and returns one protected PDF per trainee.\n\n### How it works\n1. **Course details** holds the course, date, instructor and edit password.\n2. **Get trainees** reads the trainee list from a REST endpoint.\n3. Cloud Office Print fills the DOCX template for everyone at once and outputs a single PDF.\n4. The PDF is split into one certificate per trainee.\n5. Each certificate gets an edit password so it can't be changed. Disable **Protect certificates** to skip this.\n6. Save each file in google drive\n\n### Setup steps\n1. Install the `n8n-nodes-cloudofficeprint` community node.\n2. Add your Cloud Office Print credential to the three Cloud Office Print nodes.\n3. Point **Get trainees** at your LMS or HR system, then run the workflow.",
+        "height": 712,
+        "width": 420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -32
+      ],
+      "id": "d6d187a5-f911-4497-8f6e-89f72104e015",
+      "name": "Sticky Note - Overview"
+    },
+    {
+      "parameters": {
+        "content": "## Get the data\nEach trainee needs a `name`, `email`, `company` and `id`.",
+        "height": 400,
+        "width": 900,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        432,
+        192
+      ],
+      "id": "5fe179cc-6252-41f1-a0c9-00731b6afad9",
+      "name": "Sticky Note - Get the data"
+    },
+    {
+      "parameters": {
+        "content": "## Create the certificates\nThe certificate template is a DOCX with tags like `{name}`. Swap in your own under **Generate certificates**.",
+        "height": 400,
+        "width": 1288,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        192
+      ],
+      "id": "81a89fd7-38bc-4717-9edd-0bfaeedd937a",
+      "name": "Sticky Note - Create the certificates"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        464,
+        336
+      ],
+      "id": "682c3196-bdf9-4cf8-8254-e971f559b03e",
+      "name": "Run certificate batch"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"course_title\": \"Workplace Health and Safety\",\n  \"course_hours\": 8,\n  \"completion_date\": {{ JSON.stringify($today.toFormat('MMMM d, yyyy')) }},\n  \"instructor\": \"Prabin Bhandari\",\n  \"certificate_prefix\": \"WHS-COP-2026\",\n  \"edit_password\": \"c12345\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        400
+      ],
+      "id": "02cd17e0-0f30-46c8-9b89-b53950e71e2f",
+      "name": "Course details"
+    },
+    {
+      "parameters": {
+        "url": "https://jsonplaceholder.typicode.com/users",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        912,
+        416
+      ],
+      "id": "70b17a6b-cf61-4bed-8c57-d6c1d053f654",
+      "name": "Get trainees"
+    },
+    {
+      "parameters": {
+        "jsCode": "const course = $('Course details').first().json;\nconst people = $input.all();\n\nconst trainees = people.map(({ json: person }, i) => ({\n  name: person.name,\n  email: person.email,\n  company: person.company?.name ?? '',\n  course_title: course.course_title,\n  course_hours: course.course_hours,\n  completion_date: course.completion_date,\n  instructor: course.instructor,\n  certificate_id: `${course.certificate_prefix}-${String(person.id).padStart(4, '0')}`,\n  page_break: i < people.length - 1,\n}));\n\nreturn [{ json: { trainees } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        416
+      ],
+      "id": "6bf3d6e5-e84b-4414-b224-8d2fc5640c7c",
+      "name": "Prepare certificate data"
+    },
+    {
+      "parameters": {
+        "resource": "documentGeneration",
+        "templateSource": "url",
+        "templateUrl": "",
+        "templateType": "docx",
+        "data": "={{ JSON.stringify($json) }}",
+        "outputFileName": "training-certificates",
+        "outputType": "pdf"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        352
+      ],
+      "id": "83bb4891-e163-4579-8889-9f828ef81a0d",
+      "name": "Generate certificates"
+    },
+    {
+      "parameters": {
+        "operation": "splitPDF",
+        "outputFileName": "certificate"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        352
+      ],
+      "id": "fb899b44-3bb9-4938-a7b3-96853f740783",
+      "name": "Split per trainee"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        1888,
+        432
+      ],
+      "id": "79dae62b-8ff1-428e-a655-2fc4ce6604b8",
+      "name": "Unzip certificates"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { trainees } = $('Prepare certificate data').first().json;\nconst files = $input.first().binary;\n\n// the split files are numbered in page order sort numerically so 10 comes after 9\nconst pageOf = (key) => Number(files[key].fileName.match(/(\\d+)\\.pdf$/i)?.[1] ?? 0);\nconst keys = Object.keys(files).sort((a, b) => pageOf(a) - pageOf(b));\n\nreturn keys.map((key, i) => ({\n  json: {\n    name: trainees[i].name,\n    email: trainees[i].email,\n    certificate_id: trainees[i].certificate_id,\n    file_name: `Certificate ${trainees[i].certificate_id} ${trainees[i].name}`,\n  },\n  binary: { data: files[key] },\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2128,
+        416
+      ],
+      "id": "b13e3d83-e023-4adf-befc-c0bbc0bfa9c7",
+      "name": "One item per certificate"
+    },
+    {
+      "parameters": {
+        "resource": "protectDocument",
+        "modify_password": "={{ $('Course details').first().json.edit_password }}",
+        "outputFileName": "={{ $json.file_name }}"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        2336,
+        464
+      ],
+      "id": "1b5c8a7d-f091-4648-933a-90e1e26afb3c",
+      "name": "Protect certificates"
+    },
+    {
+      "parameters": {
+        "content": "### Google Drive setup\n1. In n8n, create a **Google Drive OAuth2 API** credential. On n8n Cloud, just sign in with Google.\n2. Self-hosted: in Google Cloud, enable the Google Drive API, create an OAuth client ID and add the **OAuth Redirect URL** shown in n8n. Paste the client ID and secret into the credential and sign in.\n3. Select the credential on **Upload to Google Drive** and pick a folder.",
+        "height": 256,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2496,
+        640
+      ],
+      "typeVersion": 1,
+      "id": "e75e2970-3896-45be-abda-12ad14ac51c9",
+      "name": "Sticky Note - Google Drive setup"
+    },
+    {
+      "parameters": {
+        "name": "={{ $binary.data.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2608,
+        432
+      ],
+      "id": "83e3a3b1-b702-45ba-9967-15827033735e",
+      "name": "Upload to Google Drive"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Run certificate batch": {
+      "main": [
+        [
+          {
+            "node": "Course details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Course details": {
+      "main": [
+        [
+          {
+            "node": "Get trainees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get trainees": {
+      "main": [
+        [
+          {
+            "node": "Prepare certificate data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare certificate data": {
+      "main": [
+        [
+          {
+            "node": "Generate certificates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate certificates": {
+      "main": [
+        [
+          {
+            "node": "Split per trainee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split per trainee": {
+      "main": [
+        [
+          {
+            "node": "Unzip certificates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unzip certificates": {
+      "main": [
+        [
+          {
+            "node": "One item per certificate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One item per certificate": {
+      "main": [
+        [
+          {
+            "node": "Protect certificates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Protect certificates": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

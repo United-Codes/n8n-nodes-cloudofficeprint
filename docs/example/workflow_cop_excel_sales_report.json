@@ -1,0 +1,270 @@
+{
+  "name": "Create a password-protected Excel sales report from an orders API with Cloud Office Print",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Monthly Excel sales report\n\nTurns last month's orders into a formatted Excel report, locks it with a password and saves it to Google Drive.\n\n### How it works\n1. Runs on the 1st of every month.\n2. **Get orders** reads orders from a REST endpoint.\n3. **Build report data** works out totals, the top 10 products and one row per order.\n4. Cloud Office Print fills the XLSX template: a Summary sheet and an Orders sheet.\n5. The workbook gets an open password, then goes to Google Drive.\n\n### Setup steps\n1. Install the `n8n-nodes-cloudofficeprint` community node.\n2. Add your Cloud Office Print credential to both Cloud Office Print nodes.\n3. Set your company name and a real password in **Report settings**.\n4. Connect Google Drive, see the note under the workflow.",
+        "height": 684,
+        "width": 436
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "707cfea9-40af-4c4b-b911-731230b57cb1",
+      "name": "Sticky Note - Overview"
+    },
+    {
+      "parameters": {
+        "content": "## Get the orders\nThe sample API returns carts. For your shop, filter the call to last month and map the fields in **Build report data**.",
+        "height": 400,
+        "width": 980,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        464,
+        160
+      ],
+      "id": "d892932c-01fe-4ab3-8038-585e03aa5b47",
+      "name": "Sticky Note - Get the orders"
+    },
+    {
+      "parameters": {
+        "content": "## Build, lock and save\nTags like `{net}` and `{#orders}...{/orders}` in the XLSX template decide where the data goes.\nAt  last we save the report in drive ",
+        "height": 400,
+        "width": 760,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        160
+      ],
+      "id": "0c4f0f22-ce5f-4496-9c65-8d6c11f0737d",
+      "name": "Sticky Note - Build, lock and save"
+    },
+    {
+      "parameters": {
+        "content": "### Google Drive setup\n1. In n8n, create a **Google Drive OAuth2 API** credential. On n8n Cloud, just sign in with Google.\n2. Self-hosted: in Google Cloud, enable the Google Drive API, create an OAuth client ID and add the **OAuth Redirect URL** shown in n8n. Paste the client ID and secret into the credential and sign in.\n3. Select the credential on **Upload to Google Drive** and pick a folder.",
+        "height": 344,
+        "width": 248,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2064,
+        528
+      ],
+      "id": "5c98cfc7-b2ca-4b56-848f-d3aecd2aea6e",
+      "name": "Sticky Note - Google Drive setup"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        336
+      ],
+      "id": "e5085122-6f81-487d-9678-d132e0767e8a",
+      "name": "Every month"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"company\": \"Demo_COP\",\n  \"report_title\": \"Monthly sales report\",\n  \"report_month\": {{ JSON.stringify($today.minus({ months: 1 }).toFormat('MMMM yyyy')) }},\n  \"file_password\": \"c12345\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        784,
+        368
+      ],
+      "id": "f2ba8d04-fef7-4a3b-9035-7bf7bbb8931e",
+      "name": "Report settings"
+    },
+    {
+      "parameters": {
+        "url": "https://dummyjson.com/carts?limit=0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1024,
+        368
+      ],
+      "id": "2ae26b81-0805-40ad-a62b-34eab2b5b51b",
+      "name": "Get orders"
+    },
+    {
+      "parameters": {
+        "jsCode": "const settings = $('Report settings').first().json;\nconst { carts } = $input.first().json;\nconst round = (n) => Math.round(n * 100) / 100;\n\nconst orders = carts.map((cart) => ({\n  id: cart.id,\n  customer_id: cart.userId,\n  products: cart.totalProducts,\n  units: cart.totalQuantity,\n  gross: round(cart.total),\n  discount: round(cart.total - cart.discountedTotal),\n  net: round(cart.discountedTotal),\n}));\n\n// net revenue per product across all orders\nconst byProduct = {};\nfor (const cart of carts) {\n  for (const item of cart.products) {\n    const row = (byProduct[item.title] ??= { title: item.title, units: 0, revenue: 0 });\n    row.units += item.quantity;\n    row.revenue += item.discountedTotal;\n  }\n}\nconst topProducts = Object.values(byProduct)\n  .sort((a, b) => b.revenue - a.revenue)\n  .slice(0, 10)\n  .map((p) => ({ ...p, revenue: round(p.revenue) }));\n\nconst sum = (key) => round(orders.reduce((total, order) => total + order[key], 0));\nconst net = sum('net');\n\nreturn [{\n  json: {\n    report_title: settings.report_title,\n    company: settings.company,\n    report_month: settings.report_month,\n    order_count: orders.length,\n    units: sum('units'),\n    gross: sum('gross'),\n    discounts: sum('discount'),\n    net,\n    average_order: orders.length ? round(net / orders.length) : 0,\n    top_products: topProducts,\n    orders,\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        368
+      ],
+      "id": "efacdfc6-2a01-404a-8e46-6533ac44c20f",
+      "name": "Build report data"
+    },
+    {
+      "parameters": {
+        "resource": "documentGeneration",
+        "templateSource": "url",
+        "templateUrl": "",
+        "templateType": "xlsx",
+        "data": "={{ JSON.stringify($json) }}",
+        "outputFileName": "=Sales report {{ $('Report settings').first().json.report_month }}",
+        "outputType": "xlsx"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        368
+      ],
+      "id": "3ae61974-b12d-4dbe-9ac8-7342b5a2aa59",
+      "name": "Generate Excel report"
+    },
+    {
+      "parameters": {
+        "resource": "protectDocument",
+        "operation": "protectOfficeDocument",
+        "mimeType": "xlsx",
+        "read_password": "={{ $('Report settings').first().json.file_password }}",
+        "outputFileName": "=Sales report {{ $('Report settings').first().json.report_month }}"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        1808,
+        368
+      ],
+      "id": "706ebc10-58d1-4e36-bde1-655b5d6e646e",
+      "name": "Password protect report"
+    },
+    {
+      "parameters": {
+        "name": "={{ $binary.data.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        368
+      ],
+      "id": "64d61f40-e4ef-46fc-a52b-07cc00e2132a",
+      "name": "Upload to Google Drive"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every month": {
+      "main": [
+        [
+          {
+            "node": "Report settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Report settings": {
+      "main": [
+        [
+          {
+            "node": "Get orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get orders": {
+      "main": [
+        [
+          {
+            "node": "Build report data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build report data": {
+      "main": [
+        [
+          {
+            "node": "Generate Excel report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Excel report": {
+      "main": [
+        [
+          {
+            "node": "Password protect report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Password protect report": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

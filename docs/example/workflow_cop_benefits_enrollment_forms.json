@@ -1,0 +1,450 @@
+{
+  "name": "Send pre-filled PDF enrollment forms and read answers with Cloud Office Print",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Pre-filled benefits enrollment forms\n\nSends every employee a fillable PDF with their details already in it, then reads the returned forms straight into your HR system. No retyping in either direction.\n\n### How it works\n**Send**\n1. **Get employees** reads the people to enroll from the HR API.\n2. **Prepare form data** describes each field: locked name and ID, editable contact details, a plan choice, coverage checkboxes and a signature line.\n3. Cloud Office Print turns the DOCX template into a fillable PDF per employee.\n4. The forms go to Google Drive, ready to share or email.\n\n**Receive**\n5. The employee uploads the completed PDF on the form.\n6. **Read form answers** reads every field, and the choices are saved to the employee's record.\n\n### Setup steps\n1. Install the `n8n-nodes-cloudofficeprint` community node.\n2. Add your Cloud Office Print credential to both Cloud Office Print nodes.\n3. Fill in **Enrollment settings**. Put the production URL of **Return your enrollment form** in `return_url`.\n4. Connect Google Drive.",
+        "height": 892,
+        "width": 408
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        64,
+        160
+      ],
+      "id": "f91809a9-2237-40d0-8b3a-4627c3658326",
+      "name": "Sticky Note - Overview"
+    },
+    {
+      "parameters": {
+        "content": "## Send pre-filled forms\n\n**Download form template** gets the template from Google Drive. Pick your own copy there.",
+        "height": 400,
+        "width": 2240,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        160
+      ],
+      "id": "390f5632-51dd-4828-b2b9-d7eb6eb8ea43",
+      "name": "Sticky Note - Send pre-filled forms"
+    },
+    {
+      "parameters": {
+        "content": "## Read returned forms data\nField names come from `form_data` above. Point **Save to HR system** at your HR API.",
+        "height": 380,
+        "width": 1260,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        544,
+        624
+      ],
+      "id": "5ac3dd92-5814-4f8a-bf44-4750427280f9",
+      "name": "Sticky Note - Read returned forms"
+    },
+    {
+      "parameters": {
+        "content": "### Google Drive setup\n1. In n8n, create a **Google Drive OAuth2 API** credential. On n8n Cloud, just sign in with Google.\n2. Self-hosted: in Google Cloud, enable the Google Drive API, create an OAuth client ID and add the **OAuth Redirect URL** shown in n8n. Paste the client ID and secret into the credential and sign in.\n3. Select the credential on **Upload to Google Drive** and pick a folder.",
+        "height": 312,
+        "width": 296,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2416,
+        96
+      ],
+      "id": "0ae95784-2122-4fe9-9de2-3c4bed099c91",
+      "name": "Sticky Note - Google Drive setup"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        512,
+        336
+      ],
+      "id": "62cbe108-d144-443c-abe6-b420d59a93c1",
+      "name": "Send enrollment forms"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"company\": \"Your Company\",\n  \"plan_year\": 2027,\n  \"deadline\": {{ JSON.stringify($today.plus({ days: 14 }).toFormat('MMMM d, yyyy')) }},\n  \"return_url\": \"https://your-n8n-host/form/benefits-enrollment\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        384
+      ],
+      "id": "03460a3c-4fa3-4950-a90c-26bf107d5a9d",
+      "name": "Enrollment settings"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "users",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        320
+      ],
+      "id": "2ad17c9b-74ca-4f7e-9a86-8a6fde7c745b",
+      "name": "Split out employees"
+    },
+    {
+      "parameters": {
+        "jsCode": "const settings = $('Enrollment settings').first().json;\n\nconst text = (name, value = '', extra = {}) => ({ type: 'text', name, value, width: 260, height: 18, ...extra });\nconst checkbox = (name, label) => ({ type: 'checkbox', name, value: false, text: label, width: 160, height: 16 });\n\nreturn $input.all().map(({ json: person }) => {\n  const fullName = `${person.firstName} ${person.lastName}`;\n  return {\n    json: {\n      employee_name: fullName,\n      file_name: `Benefits enrollment ${settings.plan_year} - ${fullName}`,\n      form_data: {\n        company: settings.company,\n        plan_year: settings.plan_year,\n        deadline: settings.deadline,\n        return_url: settings.return_url,\n        first_name: person.firstName,\n        // name and ID are locked so the returned form can be matched to the right person\n        employee_name: text('employee_name', fullName, { lock: true }),\n        employee_id: text('employee_id', String(person.id), { lock: true }),\n        email: text('email', person.email),\n        phone: text('phone', person.phone),\n        department: text('department', person.company?.department ?? ''),\n        job_title: text('job_title', person.company?.title ?? ''),\n        // one entry per choice; the template loops over them so they form a single radio group\n        medical_plan: ['Basic', 'Standard', 'Premium', 'Waive coverage'].map((plan) => ({\n          option: { type: 'radio', name: 'medical_plan', value: plan, text: plan, width: 120, height: 16 },\n        })),\n        dental: checkbox('dental', 'Dental'),\n        vision: checkbox('vision', 'Vision'),\n        life_insurance: checkbox('life_insurance', 'Life insurance'),\n        dependents: text('dependents', '', { width: 60 }),\n        beneficiary_name: text('beneficiary_name'),\n        signature_name: text('signature_name'),\n        signature_date: text('signature_date', '', { width: 120 }),\n      },\n    },\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2064,
+        368
+      ],
+      "id": "6b05cd67-3b92-4793-b94b-c655225f679c",
+      "name": "Prepare form data"
+    },
+    {
+      "parameters": {
+        "operation": "createPDFForm",
+        "templateSource": "base64",
+        "templateData": "={{ $('Keep form template').first().json.template }}",
+        "templateType": "docx",
+        "formFieldData": "={{ JSON.stringify($json.form_data) }}",
+        "outputFileName": "={{ $json.file_name }}"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        432
+      ],
+      "id": "313de2b5-eb8b-408f-928f-47a88b919fc7",
+      "name": "Create pre-filled form"
+    },
+    {
+      "parameters": {
+        "name": "={{ $binary.data.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2512,
+        400
+      ],
+      "id": "b93dca1e-2507-4e31-af6a-d9bb13424f68",
+      "name": "Upload to Google Drive"
+    },
+    {
+      "parameters": {
+        "formTitle": "Return your enrollment form",
+        "formDescription": "Upload the completed PDF you received from HR.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Completed form",
+              "fieldType": "file",
+              "fieldName": "form",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Submit",
+          "path": "benefits-enrollment"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        592,
+        768
+      ],
+      "id": "c16d5ca3-e084-47bf-9065-0239d61454f6",
+      "name": "Return your enrollment form",
+      "webhookId": "2a0bdd7d-75b7-4123-bcc2-add0f3189b5c"
+    },
+    {
+      "parameters": {
+        "operation": "readPDFFormFields",
+        "binaryProperty": "form"
+      },
+      "type": "n8n-nodes-cloudofficeprint.cloudOfficePrint",
+      "typeVersion": 1,
+      "position": [
+        896,
+        832
+      ],
+      "id": "3b526ab4-a7e6-4224-86ad-36c49d165784",
+      "name": "Read form answers"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fields = $input.first().json;\nconst value = (name) => fields[name]?.[0]?.value;\nconst plan = value('medical_plan');\n\nreturn [{\n  json: {\n    employee_id: value('employee_id'),\n    employee_name: value('employee_name'),\n    benefits: {\n      medical_plan: plan && plan !== 'Off' ? plan : 'Not chosen',\n      dental: value('dental') === true,\n      vision: value('vision') === true,\n      life_insurance: value('life_insurance') === true,\n      dependents: Number(value('dependents') || 0),\n      beneficiary: value('beneficiary_name') ?? '',\n    },\n    signed_by: value('signature_name') ?? '',\n    signed_on: value('signature_date') ?? '',\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        864
+      ],
+      "id": "c10e070a-d489-42b8-a2f5-d89bf3a72861",
+      "name": "Map answers"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Thanks, you're enrolled",
+        "completionMessage": "={{ $('Map answers').first().json.employee_name }}, your choices for the {{ $('Map answers').first().json.benefits.medical_plan }} medical plan are saved.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        1680,
+        848
+      ],
+      "id": "bd4475c5-9152-4604-912a-b7a9fc073780",
+      "name": "Confirm submission",
+      "webhookId": "b820c285-e474-5d2a-80bb-fd1b07619cee"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1088,
+        320
+      ],
+      "id": "4c31a499-6ecd-4f42-a9c0-3eb219e1ba95",
+      "name": "Download form template"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "destinationKey": "template",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        368
+      ],
+      "id": "e6b91ba4-8e05-4da1-9732-8bffa7c3c40d",
+      "name": "Keep form template"
+    },
+    {
+      "parameters": {
+        "url": "https://dummyjson.com/users?limit=5&select=firstName,lastName,email,phone,company",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1616,
+        352
+      ],
+      "id": "eee31847-6e00-490f-b7c5-cf6f29e60259",
+      "name": "Get employees"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://dummyjson.com/users/{{ $json.employee_id }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ benefits: $json.benefits }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1424,
+        864
+      ],
+      "id": "58a16d5b-f42f-443a-92b7-f0dc042cabdb",
+      "name": "Save to  system"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Send enrollment forms": {
+      "main": [
+        [
+          {
+            "node": "Enrollment settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrollment settings": {
+      "main": [
+        [
+          {
+            "node": "Download form template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split out employees": {
+      "main": [
+        [
+          {
+            "node": "Prepare form data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare form data": {
+      "main": [
+        [
+          {
+            "node": "Create pre-filled form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create pre-filled form": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return your enrollment form": {
+      "main": [
+        [
+          {
+            "node": "Read form answers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read form answers": {
+      "main": [
+        [
+          {
+            "node": "Map answers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map answers": {
+      "main": [
+        [
+          {
+            "node": "Save to  system",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download form template": {
+      "main": [
+        [
+          {
+            "node": "Keep form template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep form template": {
+      "main": [
+        [
+          {
+            "node": "Get employees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get employees": {
+      "main": [
+        [
+          {
+            "node": "Split out employees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to  system": {
+      "main": [
+        [
+          {
+            "node": "Confirm submission",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
